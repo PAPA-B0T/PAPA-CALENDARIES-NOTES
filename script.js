@@ -5,6 +5,9 @@ const calendarButton = document.getElementById('calendarButton');
 const themeToggle = document.getElementById('themeToggle');
 const calendarDays = document.getElementById('calendarDays');
 const currentMonthElement = document.getElementById('currentMonth');
+const currentYearElement = document.getElementById('currentYear');
+const prevYearButton = document.getElementById('prevYear');
+const nextYearButton = document.getElementById('nextYear');
 const prevMonthButton = document.getElementById('prevMonth');
 const nextMonthButton = document.getElementById('nextMonth');
 const logContainer = document.getElementById('logContainer');
@@ -22,9 +25,25 @@ const infoModal = document.getElementById('infoModal');
 const closeInfoBtn = document.getElementById('closeInfoBtn');
 const versionHistory = document.getElementById('versionHistory');
 
-const APP_VERSION = '1.0.2';
+const APP_VERSION = '1.0.4';
 const VERSION_HISTORY = {
   en: [
+    {
+      version: '1.0.4',
+      date: '2026-04-25',
+      features: [
+        'Increased popup height by 40px to prevent scroll',
+        'Updated README installation instructions'
+      ]
+    },
+    {
+      version: '1.0.3',
+      date: '2026-04-25',
+      features: [
+        'Redesigned calendar header: separate year and month selectors',
+        'Fixed calendar grid overflow - now fits properly'
+      ]
+    },
     {
       version: '1.0.2',
       date: '2026-04-25',
@@ -65,6 +84,22 @@ const VERSION_HISTORY = {
     }
   ],
   ru: [
+    {
+      version: '1.0.4',
+      date: '2026-04-25',
+      features: [
+        'Увеличена высота popup на 40px для предотвращения скролла',
+        'Обновлена инструкция по установке в README'
+      ]
+    },
+    {
+      version: '1.0.3',
+      date: '2026-04-25',
+      features: [
+        'Переработан заголовок календаря: отдельные селекторы года и месяца',
+        'Исправлено переполнение сетки календаря - теперь помещается правильно'
+      ]
+    },
     {
       version: '1.0.2',
       date: '2026-04-25',
@@ -729,7 +764,12 @@ function updateCalendar() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  currentMonthElement.textContent = formatDisplayDate(new Date(year, month, 1)).split(',')[0] + ' ' + year;
+  currentYearElement.textContent = year;
+  
+  const monthNames = currentLang === 'ru' 
+    ? ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
+    : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  currentMonthElement.textContent = monthNames[month];
 
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -903,6 +943,44 @@ function setupEventListeners() {
       currentDate.setMonth(currentDate.getMonth() + 1);
       updateCalendar();
       logger.debug('Calendar next month', { month: currentDate.getMonth() });
+
+      calendarDays.style.transform = 'translateX(20px)';
+
+      requestAnimationFrame(() => {
+        calendarDays.style.transform = 'translateX(0)';
+        calendarDays.style.opacity = '1';
+      });
+    }, 300);
+  });
+
+  prevYearButton.addEventListener('click', () => {
+    calendarDays.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    calendarDays.style.transform = 'translateX(20px)';
+    calendarDays.style.opacity = '0';
+
+    setTimeout(() => {
+      currentDate.setFullYear(currentDate.getFullYear() - 1);
+      updateCalendar();
+      logger.debug('Calendar previous year', { year: currentDate.getFullYear() });
+
+      calendarDays.style.transform = 'translateX(-20px)';
+
+      requestAnimationFrame(() => {
+        calendarDays.style.transform = 'translateX(0)';
+        calendarDays.style.opacity = '1';
+      });
+    }, 300);
+  });
+
+  nextYearButton.addEventListener('click', () => {
+    calendarDays.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    calendarDays.style.transform = 'translateX(-20px)';
+    calendarDays.style.opacity = '0';
+
+    setTimeout(() => {
+      currentDate.setFullYear(currentDate.getFullYear() + 1);
+      updateCalendar();
+      logger.debug('Calendar next year', { year: currentDate.getFullYear() });
 
       calendarDays.style.transform = 'translateX(20px)';
 

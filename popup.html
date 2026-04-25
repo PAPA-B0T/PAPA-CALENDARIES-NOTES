@@ -87,9 +87,16 @@
 
     <div id="calendarView" class="view">
       <div class="calendar-header">
-        <button id="prevMonth" class="nav-button">&lt;</button>
-        <h2 id="currentMonth">April 2025</h2>
-        <button id="nextMonth" class="nav-button">&gt;</button>
+        <div class="year-selector">
+          <button id="prevYear" class="nav-button small">&lt;</button>
+          <span id="currentYear">2026</span>
+          <button id="nextYear" class="nav-button small">&gt;</button>
+        </div>
+        <div class="month-selector">
+          <button id="prevMonth" class="nav-button">&lt;</button>
+          <span id="currentMonth">April</span>
+          <button id="nextMonth" class="nav-button">&gt;</button>
+        </div>
       </div>
       
       <div class="calendar-days">
