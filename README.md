@@ -1,115 +1,115 @@
 # 📅 PAPA CALENDARIES NOTES
 
-**PAPA CALENDARIES NOTES** - это расширение для Chrome/Chromium браузеров для ведения заметок в календаре с множественными заметками на одну дату, поддержкой изображений, приоритетов и полной локализацией на русский и английский языки.
+**PAPA CALENDARIES NOTES** is a Chrome/Chromium browser extension for taking notes in a calendar with multiple notes per date, image support, priorities, and full localization in Russian and English.
 
-> ✨ Без регистрации. Без облака. Только вы и ваши заметки.
-
----
-
-## 🚀 Возможности
-
-### 📅 Календарь
-- Красивый и минималистичный интерфейс календаря.
-- Отображение дней с заметками.
-- Цветовое кодирование приоритетов дат (🔘🟢🟠🔴).
-
-### 📝 Множественные заметки
-- Несколько заметок на одну дату.
-- Каждая заметка имеет заголовок и текст.
-- Вставка изображений через Ctrl+V или кнопку.
-- Выбор цвета заголовка заметки.
-- 4 уровня важности заметок (🔘🟢🟠🔴).
-
-### 🖼 Изображения
-- Вставка картинок из буфера обмена.
-- Просмотр картинки в полном размере с зумом.
-
-### 🌗 Тёмная/Светлая тема
-- Автоматическое определение системной темы.
-- Ручное переключение.
-
-### 💰 Пожертвования
-- Поддержать разработку можно через TON, TRC20, ERC20, SOL (USDT).
-
-### 📤 Экспорт/Импорт
-- Экспорт всех данных в JSON файл.
-- Импорт с объединением данных (не перезаписывает существующие заметки).
-
-### 📚 Версионирование
-- Автоматическое ведение истории версий.
-- История изменений в окне "О расширении".
+> ✨ No registration. No cloud. Just you and your notes.
 
 ---
 
-## 📦 Установка
+## 🚀 Features
 
-1. Клонируйте или скачайте репозиторий ( зеленая кнопка "Code" -> Download ZIP).
-2. Распакуйте ZIP архив в удобное для вас место.
-3. Откройте браузер Chrome и введите в адресной строке браузера "chrome://extensions".
-4. Включите "Режим разработчика" (справа сверху).
-5. Нажмите "Загрузить распоковочное расширение" и выберите содержимое папки "PAPA-CALENDARIES-NOTES-master".
-6. Откройте "Расширения" в браузере (справа сверху) и Закрепите значок расширения на панели инструментов.
+### 📅 Calendar
+- Beautiful and minimalist calendar interface.
+- Display days with notes.
+- Color-coded priority dates (🔘🟢🟠🔴).
+
+### 📝 Multiple Notes
+- Several notes per date.
+- Each note has a title and text.
+- Insert images via Ctrl+V or button.
+- Choose note title color.
+- 4 priority levels (🔘🟢🟠🔴).
+
+### 🖼 Images
+- Insert images from clipboard.
+- View image in full size with zoom.
+
+### 🌗 Dark/Light Theme
+- Automatic system theme detection.
+- Manual toggle.
+
+### 💰 Donations
+- Support development via TON, TRC20, ERC20, SOL (USDT).
+
+### 📤 Export/Import
+- Export all data to JSON file.
+- Import with merge (does not overwrite existing notes).
+
+### 📚 Versioning
+- Automatic version history.
+- Change history in "About" window.
 
 ---
 
-## 🛠 Технологии
+## 📦 Installation
+
+1. Clone or download the repository ( green "Code" button -> Download ZIP).
+2. Unzip the archive to a convenient location.
+3. Open Chrome browser and type "chrome://extensions" in the address bar.
+4. Enable "Developer mode" (top right).
+5. Click "Load unpacked" and select the contents of the folder "PAPA-CALENDARIES-NOTES-master".
+6. Open "Extensions" in your browser (top right) and Pin the extension icon to the toolbar.
+
+---
+
+## 🛠 Technologies
 
 - HTML5
-- CSS3 (тёмная/светлая тема с `prefers-color-scheme`)
+- CSS3 (dark/light theme with `prefers-color-scheme`)
 - JavaScript (Vanilla)
 - Chrome Storage API (`chrome.storage.local`)
 
 ---
 
-## 📸 Предпросмотр
+## 📸 Preview
 
-### 🎥 Полная видеоинструкция
+### 🎥 Full Video Instruction
 ![Video Instruction](INSTRYCTION-GIF.gif)
 
-Полная видеоинструкция по установке и функционалу расширения.
+Full video instruction on extension installation and functionality.
 
 <!-- ![Demo](doc/preview.gif) -->
 
 ---
 
-## 🔐 Конфиденциальность
+## 🔐 Privacy
 
-- Все данные хранятся локально в браузере.
-- Нет облачной синхронизации.
-- Ваши заметки только для вас.
+- All data is stored locally in your browser.
+- No cloud synchronization.
+- Your notes are only for you.
 
 ---
 
-## 📁 Структура проекта
+## 📁 Project Structure
 
 ```
 PAPA-CALENDARIES-NOTES/
-├── popup.html          # Интерфейс расширения
-├── script.js           # Логика работы
-├── styles.css          # Стили (тёмная/светлая тема)
-├── logger.js           # Система логирования
-├── manifest.json       # Конфигурация расширения
-├── icon.png            # Иконка расширения
-├── calendar_icon_1.png # Иконка для календаря
-├── .env                # Конфигурация (не в репозитории)
-├── doc/                # Документация и изображения
+├── popup.html          # Extension interface
+├── script.js           # Working logic
+├── styles.css          # Styles (dark/light theme)
+├── logger.js           # Logging system
+├── manifest.json       # Extension configuration
+├── icon.png            # Extension icon
+├── calendar_icon_1.png # Calendar icon
+├── .env                # Configuration (not in repository)
+├── doc/                # Documentation and images
 │   ├── TON - USDT.png
 │   ├── TRC20 - USDT.png
 │   ├── ERC20 - USDT.png
 │   └── SOL - USDT.png
-├── README.md           # Этот файл
-└── LICENSE             # Лицензия
+├── README.md           # This file
+└── LICENSE             # License
 ```
 
 ---
 
-## 🧠 Создано с любовью
+## 🧠 Made with Love
 
-Для удобного ведения заметок 🧘‍♂️💻
+For convenient note-taking 🧘‍♂️💻
 
 ---
 
-## 💰 Поддержать проект
+## 💰 Support the Project
 
 USDT (TRC20): `TFtKizr6WwHccsLSJCYuYAsLbiLyCGj17p`
 
