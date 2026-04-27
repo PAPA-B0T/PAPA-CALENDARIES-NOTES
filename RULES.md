@@ -52,3 +52,24 @@ Before any code change:
 - [ ] Update manifest.json version
 - [ ] Test functionality
 - [ ] Create backup before push
+
+## 📝 Logging Rules
+
+### Required Logging
+- **ALL new features MUST have logging** using the `logger` object
+- Use `logger.info()`, `logger.warn()`, `logger.error()`, `logger.debug()`
+- Log: function entry, important actions, data changes, errors
+
+### Log Example
+```javascript
+function myFunction(param) {
+  logger.info('myFunction called', { param });
+  // ... code ...
+  logger.info('myFunction completed', { result });
+}
+```
+
+### Log Export
+- Logs are stored in Chrome Storage
+- Export via: Settings → Export Logs (archiveLogs)
+- Logs saved as JSON file for debugging

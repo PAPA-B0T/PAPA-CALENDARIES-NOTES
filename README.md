@@ -22,6 +22,15 @@
 - **Move note up/down** in list (⬆️/⬇️ buttons).
 - **Move note to any date** (🔁 button with date picker).
 
+### ✅ Tasks
+- Tasks bound to dates like notes.
+- Task title color selection.
+- 4 priority levels (🔘🟢🟠🔴).
+- Subtasks within tasks.
+- Task/subtask completion with timestamp (dd.mm.yy-hh:mm:ss).
+- Tasks auto-complete when all subtasks are done.
+- Edit/Delete task buttons with EN/RU tooltips.
+
 ### 🖼 Images
 - Insert images from clipboard.
 - View image in full size with zoom.
@@ -34,8 +43,8 @@
 - Support development via TON, TRC20, ERC20, SOL (USDT).
 
 ### 📤 Export/Import
-- Export all data to JSON file.
-- Import with merge (does not overwrite existing notes).
+- Export all data (notes + tasks) to JSON file.
+- Import with merge — duplicates by ID are replaced (notes and tasks).
 
 ### 📚 Versioning
 - Automatic version history.

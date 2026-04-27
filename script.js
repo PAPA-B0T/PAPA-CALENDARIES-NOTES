@@ -46,9 +46,34 @@ let currentTaskSubtasks = [];
 let currentTaskPriority = 'white';
 let currentTaskTitleColor = 'default';
 
-const APP_VERSION = '1.0.9';
+const APP_VERSION = '1.1.1';
 const VERSION_HISTORY = {
   en: [
+    {
+      version: '1.1.1',
+      date: '2026-04-27',
+      features: [
+        'Fixed: date/time in subtasks no longer strikethrough',
+        'Added: auto-add subtask from input when saving task without clicking "+ Add subtask"',
+        'Date in tasks/subtasks now light red (#ff6b6b), time is green (#27ae60)',
+        'Notes indicator now shows tooltip "Notes"/"Notes" on hover',
+        'Edit note button now blue color'
+      ]
+    },
+    {
+      version: '1.1.0',
+      date: '2026-04-27',
+      features: [
+        'Task calendar indicators update on task CRUD (add/delete/edit)',
+        'Extension opens to calendar view by default',
+        'Edit/Delete task buttons have EN/RU tooltips',
+        'Editing task loads title, priority, color, subtasks correctly',
+        'Delete/Cancel/Save buttons localized in task modal',
+        'Window width 430px, calendar gap 3px',
+        'Completion timestamp (dd.mm.yy-hh:mm:ss) right-aligned on done tasks/subtasks',
+        'Import/export: duplicates by ID are replaced, new ID on every task edit'
+      ]
+    },
     {
       version: '1.0.9',
       date: '2026-04-27',
@@ -154,6 +179,31 @@ const VERSION_HISTORY = {
     }
   ],
 ru: [
+    {
+      version: '1.1.1',
+      date: '2026-04-27',
+      features: [
+        'Исправлено: дата/время в подзадачах больше не зачёркнуты',
+        'Добавлено: автоматическое добавление подзадачи из поля ввода при сохранении задачи',
+        'Дата в задачах/подзадачах теперь светло-красная (#ff6b6b), время зелёное (#27ae60)',
+        'Индикатор заметок теперь показывает подсказку "Заметки" при наведении',
+        'Кнопка редактирования заметки теперь синего цвета'
+      ]
+    },
+    {
+      version: '1.1.0',
+      date: '2026-04-27',
+      features: [
+        'Индикаторы задач на календаре обновляются при CRUD (добавить/удалить/редактировать)',
+        'Расширение открывается на представлении календаря по умолчанию',
+        'Кнопки редактирования/удаления задач имеют подсказки EN/RU',
+        'Редактирование задачи загружает название, приоритет, цвет, подзадачи',
+        'Кнопки Удалить/Отмена/Сохранить локализованы в модалке задач',
+        'Ширина окна 430px, gap между днями 3px',
+        'Время выполнения (dd.mm.yy-hh:mm:ss) справа от выполненных задач/подзадач',
+        'Import/export: дубликаты по ID заменяются, новый ID при каждом редактировании задачи'
+      ]
+    },
     {
       version: '1.0.9',
       date: '2026-04-27',
@@ -360,7 +410,9 @@ const translations = {
     editTask: 'Edit Task',
     addSubtask: 'Add subtask',
     taskTitlePlaceholder: 'Task title...',
-    addSubtaskPlaceholder: 'Add subtask...'
+    addSubtaskPlaceholder: 'Add subtask...',
+    editTooltip: 'Edit task',
+    deleteTooltip: 'Delete task'
   },
   ru: {
     appTitle: 'КАЛЕНДАРЬ И ЗАМЕТКИ',
@@ -434,7 +486,9 @@ const translations = {
     editTask: 'Редактировать задачу',
     addSubtask: 'Добавить подзадачу',
     taskTitlePlaceholder: 'Название задачи...',
-    addSubtaskPlaceholder: 'Добавить подзадачу...'
+    addSubtaskPlaceholder: 'Добавить подзадачу...',
+    editTooltip: 'Редактировать задачу',
+    deleteTooltip: 'Удалить задачу'
   }
 };
 
@@ -520,7 +574,11 @@ function setLanguage(lang) {
   if (addSubtaskBtnEl) addSubtaskBtnEl.textContent = '+ ' + t('addSubtask');
   
   if (subtaskInputEl) subtaskInputEl.placeholder = t('addSubtaskPlaceholder');
-
+  
+  if (deleteTaskBtn) deleteTaskBtn.textContent = t('delete');
+  if (cancelTaskBtn) cancelTaskBtn.textContent = t('cancel');
+  if (saveTaskBtn) saveTaskBtn.textContent = t('save');
+  
   const placeholder = currentLang === 'ru' ? t('noteContentPlaceholderRu') : t('noteContentPlaceholder');
   noteContentInput.setAttribute('data-placeholder', placeholder);
 
@@ -545,8 +603,7 @@ function init() {
   noteContentInput.setAttribute('data-placeholder', placeholder);
 
   updateTheme();
-  loadNotesForDate(formatDate(selectedDate));
-  updateCalendar();
+  switchToCalendar();
 
   chrome.storage.local.get(null, (data) => {
     currentNotes = data;
@@ -563,6 +620,17 @@ function formatDate(date) {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function formatDoneAt(isoString) {
+  const d = new Date(isoString);
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yy = String(d.getFullYear()).slice(-2);
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `<span class="done-date">${dd}.${mm}.${yy}</span>-<span class="done-time">${hh}:${min}:${ss}</span>`;
 }
 
 function formatDisplayDate(date) {
@@ -919,8 +987,14 @@ function loadTasks() {
 }
 
 function renderTasksList() {
+  const dateKey = formatDate(selectedDate);
+  logger.info('renderTasksList called', { dateKey, taskCount: (currentTasks || []).length });
+  
   const tasksListEl = document.getElementById('tasksList');
-  if (!tasksListEl) return;
+  if (!tasksListEl) {
+    logger.warn('renderTasksList: tasksList element not found');
+    return;
+  }
   
   tasksListEl.innerHTML = '';
   const tasks = currentTasks || [];
@@ -932,10 +1006,12 @@ function renderTasksList() {
         <p class="sub-text">${t('clickToAddTask')}</p>
       </div>
     `;
+    logger.info('renderTasksList: no tasks to render');
     return;
   }
   
   tasks.forEach(task => {
+    logger.debug('renderTasksList: rendering task', { taskId: task.id, done: task.done, subtaskCount: (task.subtasks || []).length });
     const taskEl = document.createElement('div');
     taskEl.className = 'task-item';
     taskEl.dataset.priority = task.priority || 'white';
@@ -946,22 +1022,27 @@ function renderTasksList() {
     const prioritySymbol = PRIORITY_SYMBOLS[task.priority] || PRIORITY_SYMBOLS.white;
     const doneSymbol = task.done ? '✅' : '⬜';
     
-    const subtasksHtml = task.subtasks ? task.subtasks.map(st => `
-      <div class="subtask-item ${st.done ? 'done' : ''}" data-id="${st.id}">
+    const subtasksHtml = task.subtasks ? task.subtasks.map(st => {
+      const stDoneAt = st.doneAt ? formatDoneAt(st.doneAt) : '';
+      return `<div class="subtask-item ${st.done ? 'done' : ''}" data-id="${st.id}">
         <input type="checkbox" class="subtask-checkbox" ${st.done ? 'checked' : ''}>
-        <span>${escapeHtml(st.text)}</span>
-      </div>
-    `).join('') : '';
+        <span class="subtask-text">${escapeHtml(st.text)}</span>
+        ${stDoneAt ? `<span class="done-at">${stDoneAt}</span>` : ''}
+      </div>`;
+    }).join('') : '';
+    
+    const doneAtStr = task.doneAt ? formatDoneAt(task.doneAt) : '';
     
     taskEl.innerHTML = `
       <div class="task-header">
         <input type="checkbox" class="task-checkbox" ${task.done ? 'checked' : ''}>
         <div class="task-title" style="${titleColorStyle}">${prioritySymbol} ${escapeHtml(task.title)}</div>
+        ${doneAtStr ? `<span class="done-at">${doneAtStr}</span>` : ''}
       </div>
       <div class="task-subtasks">${subtasksHtml}</div>
       <div class="task-actions">
-        <button class="edit-task-btn" data-id="${task.id}">✏️</button>
-        <button class="delete-task-btn" data-id="${task.id}">🗑️</button>
+        <button class="edit-task-btn" data-id="${task.id}" title="${t('editTooltip')}">✏️</button>
+        <button class="delete-task-btn" data-id="${task.id}" title="${t('deleteTooltip')}">🗑️</button>
       </div>
     `;
     
@@ -986,7 +1067,24 @@ function openTaskModal(taskId = null) {
   subtaskInput.value = '';
   subtasksList.innerHTML = '';
   
-  document.getElementById('taskModalTitle').textContent = t('addTask');
+  if (taskId) {
+    const dateKey = formatDate(selectedDate);
+    const dateData = currentNotes[dateKey];
+    if (dateData && dateData.tasks) {
+      const task = dateData.tasks.find(t => t.id === taskId);
+      if (task) {
+        taskTitleInput.value = task.title || '';
+        currentTaskPriority = task.priority || 'white';
+        currentTaskTitleColor = task.titleColor || 'default';
+        currentTaskSubtasks = task.subtasks ? [...task.subtasks] : [];
+        renderSubtasksList();
+        document.getElementById('taskModalTitle').textContent = t('editTask');
+      }
+    }
+  } else {
+    document.getElementById('taskModalTitle').textContent = t('addTask');
+  }
+  
   deleteTaskBtn.style.display = taskId ? 'block' : 'none';
   
   updateTaskPriorityButtons();
@@ -1053,12 +1151,22 @@ function saveTask() {
     return;
   }
   
+  const subtaskText = subtaskInput.value.trim();
+  if (subtaskText) {
+    currentTaskSubtasks.push({
+      id: generateId(),
+      text: subtaskText,
+      done: false
+    });
+    logger.info('Auto-added subtask from input', { text: subtaskText });
+  }
+  
   chrome.storage.local.get(dateKey, (result) => {
     const dateData = result[dateKey] || { notes: [], priority: 'white', tasks: [] };
     let tasks = dateData.tasks || [];
     
     const newTask = {
-      id: editingTaskId || generateId(),
+      id: generateId(),
       title: title,
       priority: currentTaskPriority,
       titleColor: currentTaskTitleColor,
@@ -1073,6 +1181,7 @@ function saveTask() {
       if (taskIndex !== -1) {
         newTask.created = tasks[taskIndex].created;
         newTask.done = tasks[taskIndex].done;
+        newTask.doneAt = tasks[taskIndex].doneAt || null;
         tasks.splice(taskIndex, 1);
       }
     }
@@ -1082,6 +1191,7 @@ function saveTask() {
     
     chrome.storage.local.set({ [dateKey]: dateData }, () => {
       currentTasks = tasks;
+      currentNotes[dateKey] = dateData;
       renderTasksList();
       updateCalendar();
       closeTaskModalWindow();
@@ -1102,15 +1212,18 @@ function toggleTaskDone(taskId, done) {
     
     task.done = done;
     task.modified = new Date().toISOString();
+    if (done) task.doneAt = new Date().toISOString();
+    else task.doneAt = null;
     
     if (done && task.subtasks && task.subtasks.length > 0) {
-      task.subtasks.forEach(st => st.done = true);
+      task.subtasks.forEach(st => { st.done = true; st.doneAt = new Date().toISOString(); });
     }
     
     dateData.tasks = tasks;
     
     chrome.storage.local.set({ [dateKey]: dateData }, () => {
       currentTasks = tasks;
+      currentNotes[dateKey] = dateData;
       renderTasksList();
       updateCalendar();
       logger.info('Task toggled', { taskId, done, date: dateKey });
@@ -1120,28 +1233,40 @@ function toggleTaskDone(taskId, done) {
 
 function toggleSubtaskDone(taskId, subtaskId, done) {
   const dateKey = formatDate(selectedDate);
+  logger.info('toggleSubtaskDone called', { taskId, subtaskId, done, dateKey });
   
   chrome.storage.local.get(dateKey, (result) => {
     const dateData = result[dateKey] || { notes: [], priority: 'white', tasks: [] };
     let tasks = dateData.tasks || [];
     const task = tasks.find(t => t.id === taskId);
-    if (!task || !task.subtasks) return;
+    if (!task || !task.subtasks) {
+      logger.warn('toggleSubtaskDone: task or subtasks not found', { taskId, subtaskId });
+      return;
+    }
   
   const subtask = task.subtasks.find(st => st.id === subtaskId);
   if (subtask) {
+    const oldDone = subtask.done;
     subtask.done = done;
+    subtask.doneAt = done ? new Date().toISOString() : null;
     task.modified = new Date().toISOString();
+    
+    logger.info('subtask toggled', { subtaskId, oldDone, newDone: done, doneAt: subtask.doneAt });
     
     if (task.subtasks.length > 0 && task.subtasks.every(st => st.done)) {
       task.done = true;
+      task.doneAt = new Date().toISOString();
+      logger.info('task auto-completed due to all subtasks done', { taskId });
     }
     
     dateData.tasks = tasks;
     
     chrome.storage.local.set({ [dateKey]: dateData }, () => {
       currentTasks = tasks;
+      currentNotes[dateKey] = dateData;
       renderTasksList();
       updateCalendar();
+      logger.info('toggleSubtaskDone: saved to storage', { dateKey });
     });
   }
 });
@@ -1161,6 +1286,7 @@ function deleteTask(taskId) {
     
     chrome.storage.local.set({ [dateKey]: dateData }, () => {
       currentTasks = tasks;
+      currentNotes[dateKey] = dateData;
       renderTasksList();
       updateCalendar();
       showNotification(t('taskDeleted'));
@@ -1404,6 +1530,7 @@ function updateCalendar() {
       const noteIndicator = document.createElement('span');
       noteIndicator.className = 'note-indicator';
       noteIndicator.textContent = noteCount;
+      noteIndicator.title = t('tabNotes');
       dayElement.appendChild(noteIndicator);
     }
 
@@ -1781,11 +1908,12 @@ function setupEventListeners() {
                 }
                 
                 for (const importedNote of importedValue.notes) {
-                  const newNote = { ...importedNote };
-                  if (!newNote.id) {
-                    newNote.id = generateId();
+                  const existingIndex = mergedData[dateKey].notes.findIndex(n => n.id === importedNote.id);
+                  if (existingIndex !== -1) {
+                    mergedData[dateKey].notes[existingIndex] = { ...importedNote };
+                  } else {
+                    mergedData[dateKey].notes.push({ ...importedNote });
                   }
-                  mergedData[dateKey].notes.push(newNote);
                 }
               }
               
@@ -1799,11 +1927,12 @@ function setupEventListeners() {
                 }
                 
                 for (const importedTask of importedValue.tasks) {
-                  const newTask = { ...importedTask };
-                  if (!newTask.id) {
-                    newTask.id = generateId();
+                  const existingIndex = mergedData[dateKey].tasks.findIndex(t => t.id === importedTask.id);
+                  if (existingIndex !== -1) {
+                    mergedData[dateKey].tasks[existingIndex] = { ...importedTask };
+                  } else {
+                    mergedData[dateKey].tasks.push({ ...importedTask });
                   }
-                  mergedData[dateKey].tasks.push(newTask);
                 }
               }
             }
