@@ -3,7 +3,7 @@
     "name": "PAPA CALENDARIES NOTES",
     "version": "1.0.7",
     "description": "A lightweight, private browser extension for quick daily reflections and thoughts",
-    "permissions": ["storage"],
+    "permissions": ["storage", "sidePanel"],
     "background": {
       "service_worker": "service_worker.js"
     },
