@@ -38,6 +38,13 @@ Before any code change:
 - Update installation instructions if changed
 - Update project structure if files change
 
+## ⬆️ GitHub Push Rules
+
+### Push to GitHub
+- **NEVER push to GitHub automatically**
+- **Only push when explicitly requested** by user
+- Wait for explicit command like "запуш", "push", "залей на гитхаб"
+
 ### Release Checklist
 - [ ] Update APP_VERSION
 - [ ] Add entry to VERSION_HISTORY.en
