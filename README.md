@@ -19,6 +19,8 @@
 - Insert images via Ctrl+V or button.
 - Choose note title color.
 - 4 priority levels (🔘🟢🟠🔴).
+- **Move note up/down** in list (⬆️/⬇️ buttons).
+- **Move note to any date** (🔁 button with date picker).
 
 ### 🖼 Images
 - Insert images from clipboard.
@@ -92,6 +94,7 @@ PAPA-CALENDARIES-NOTES/
 ├── icon.png            # Extension icon
 ├── calendar_icon_1.png # Calendar icon
 ├── .env                # Configuration (not in repository)
+├── RULES.md            # Project rules
 ├── doc/                # Documentation and images
 │   ├── TON - USDT.png
 │   ├── TRC20 - USDT.png
