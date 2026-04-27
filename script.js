@@ -25,9 +25,16 @@ const infoModal = document.getElementById('infoModal');
 const closeInfoBtn = document.getElementById('closeInfoBtn');
 const versionHistory = document.getElementById('versionHistory');
 
-const APP_VERSION = '1.0.6';
+const APP_VERSION = '1.0.7';
 const VERSION_HISTORY = {
   en: [
+    {
+      version: '1.0.7',
+      date: '2026-04-27',
+      features: [
+        'Fixed Side Panel - added service_worker.js for Alt+N shortcut'
+      ]
+    },
     {
       version: '1.0.6',
       date: '2026-04-27',
@@ -101,6 +108,13 @@ const VERSION_HISTORY = {
     }
   ],
   ru: [
+    {
+      version: '1.0.7',
+      date: '2026-04-27',
+      features: [
+        'Исправлена работа Side Panel - добавлен service_worker.js для Alt+N'
+      ]
+    },
     {
       version: '1.0.6',
       date: '2026-04-27',

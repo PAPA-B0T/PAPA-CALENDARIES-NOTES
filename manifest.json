@@ -1,9 +1,12 @@
 {
     "manifest_version": 3,
     "name": "PAPA CALENDARIES NOTES",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "A lightweight, private browser extension for quick daily reflections and thoughts",
     "permissions": ["storage"],
+    "background": {
+      "service_worker": "service_worker.js"
+    },
     "action": {
       "default_popup": "popup.html",
       "default_icon": {
