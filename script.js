@@ -25,9 +25,18 @@ const infoModal = document.getElementById('infoModal');
 const closeInfoBtn = document.getElementById('closeInfoBtn');
 const versionHistory = document.getElementById('versionHistory');
 
-const APP_VERSION = '1.0.5';
+const APP_VERSION = '1.0.6';
 const VERSION_HISTORY = {
   en: [
+    {
+      version: '1.0.6',
+      date: '2026-04-27',
+      features: [
+        'Notes with same title but different priority are now treated as different notes',
+        'Priority symbol (🔘🟢🟠🔴) shown in note title',
+        'Fixed: edit/delete now only affects one note by id, not all notes with same title'
+      ]
+    },
     {
       version: '1.0.5',
       date: '2026-04-27',
@@ -92,7 +101,16 @@ const VERSION_HISTORY = {
       ]
     }
   ],
-  ru: [
+ru: [
+    {
+      version: '1.0.6',
+      date: '2026-04-27',
+      features: [
+        'Заметки с одинаковым названием но разным приоритетом теперь разные заметки',
+        'Символ приоритета (🔘🟢🟠🔴) показывается в заголовке заметки',
+        'Исправлено: редактирование/удаление теперь только для одной заметки по id'
+      ]
+    },
     {
       version: '1.0.5',
       date: '2026-04-27',
@@ -493,9 +511,10 @@ function renderNotesList() {
     const timeStr = date.toLocaleTimeString(currentLang === 'ru' ? 'ru-RU' : 'en-US', { hour: '2-digit', minute: '2-digit' });
     const titleColor = note.titleColor || 'default';
     const titleColorStyle = titleColor !== 'default' ? `color: ${TITLE_COLORS[titleColor]}` : '';
+    const prioritySymbol = PRIORITY_SYMBOLS[note.priority] || PRIORITY_SYMBOLS.white;
 
     noteEl.innerHTML = `
-      <div class="note-title" style="${titleColorStyle}">${escapeHtml(note.title || t('addNote'))}</div>
+      <div class="note-title" style="${titleColorStyle}">${prioritySymbol} ${escapeHtml(note.title || t('addNote'))}</div>
       <div class="note-preview">${escapeHtml(previewText)}</div>
       <div class="note-meta">
         <span class="note-time">${timeStr}</span>
