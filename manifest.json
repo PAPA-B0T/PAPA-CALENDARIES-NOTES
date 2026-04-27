@@ -16,7 +16,8 @@
       }
     },
     "side_panel": {
-      "default_path": "sidepanel.html"
+      "default_path": "sidepanel.html",
+      "open panel on install": true
     },
     "commands": {
       "toggle-side-panel": {
