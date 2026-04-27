@@ -25,9 +25,18 @@ const infoModal = document.getElementById('infoModal');
 const closeInfoBtn = document.getElementById('closeInfoBtn');
 const versionHistory = document.getElementById('versionHistory');
 
-const APP_VERSION = '1.0.6';
+const APP_VERSION = '1.0.7';
 const VERSION_HISTORY = {
   en: [
+    {
+      version: '1.0.7',
+      date: '2026-04-27',
+      features: [
+        'On save: edited note gets new unique ID',
+        'Each edit creates new note instance - no more duplicates confusion',
+        'Delete now only removes one note per click'
+      ]
+    },
     {
       version: '1.0.6',
       date: '2026-04-27',
@@ -102,6 +111,15 @@ const VERSION_HISTORY = {
     }
   ],
 ru: [
+    {
+      version: '1.0.7',
+      date: '2026-04-27',
+      features: [
+        'При сохранении редактируемой заметки ей присваивается новый уникальный ID',
+        'Каждое редактирование создаёт новый экземпляр заметки - больше путаницы с дубликатами',
+        'Удаление теперь удаляет только одну заметку за клик'
+      ]
+    },
     {
       version: '1.0.6',
       date: '2026-04-27',
@@ -236,6 +254,7 @@ const translations = {
     note: 'note',
     confirmDelete: 'Delete this note?',
     noteSaved: 'Note saved',
+    noteSavedAsNew: 'Note saved as new',
     noteDeleted: 'Note deleted',
     backToCalendar: 'Back to calendar',
     priorityWhite: 'not important',
@@ -296,6 +315,7 @@ const translations = {
     note: 'заметка',
     confirmDelete: 'Удалить эту заметку?',
     noteSaved: 'Заметка сохранена',
+    noteSavedAsNew: 'Заметка сохранена как новая',
     noteDeleted: 'Заметка удалена',
     backToCalendar: 'Назад к календарю',
     priorityWhite: 'не важно',
@@ -767,15 +787,19 @@ function saveNote() {
   if (editingNoteId) {
     const noteIndex = notesData.notes.findIndex(n => n.id === editingNoteId);
     if (noteIndex !== -1) {
-      notesData.notes[noteIndex] = {
-        ...notesData.notes[noteIndex],
-        title,
+      const oldNote = notesData.notes[noteIndex];
+      notesData.notes.splice(noteIndex, 1);
+      const newNote = {
+        id: generateId(),
+        title: title || t('addNote'),
         html,
         text,
         priority: currentNotePriority,
         titleColor: currentTitleColor,
+        created: oldNote.created || new Date().toISOString(),
         modified: new Date().toISOString()
       };
+      notesData.notes.push(newNote);
     }
   } else {
     const newNote = {
@@ -796,8 +820,8 @@ function saveNote() {
     renderNotesList();
     updateCalendar();
     closeNoteModal();
-    showNotification(t('noteSaved'));
-    logger.info('Note saved', { date: dateKey, noteId: editingNoteId });
+    showNotification(editingNoteId ? t('noteSavedAsNew') : t('noteSaved'));
+    logger.info('Note saved', { date: dateKey, noteId: editingNoteId, newId: editingNoteId ? notesData.notes[notesData.notes.length - 1].id : null });
   });
 }
 
