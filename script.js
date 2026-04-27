@@ -1,5 +1,6 @@
 const editorView = document.getElementById('editorView');
 const calendarView = document.getElementById('calendarView');
+const tasksView = document.getElementById('tasksView');
 const logView = document.getElementById('logView');
 const calendarButton = document.getElementById('calendarButton');
 const themeToggle = document.getElementById('themeToggle');
@@ -25,9 +26,51 @@ const infoModal = document.getElementById('infoModal');
 const closeInfoBtn = document.getElementById('closeInfoBtn');
 const versionHistory = document.getElementById('versionHistory');
 
-const APP_VERSION = '1.0.7';
+const tabNotes = document.getElementById('tabNotes');
+const tabTasks = document.getElementById('tabTasks');
+const addTaskBtn = document.getElementById('addTaskBtn');
+const tasksList = document.getElementById('tasksList');
+const taskModal = document.getElementById('taskModal');
+const taskTitleInput = document.getElementById('taskTitle');
+const closeTaskBtn = document.getElementById('closeTaskModal');
+const subtasksList = document.getElementById('subtasksList');
+const subtaskInput = document.getElementById('subtaskInput');
+const addSubtaskBtn = document.getElementById('addSubtaskBtn');
+const deleteTaskBtn = document.getElementById('deleteTaskBtn');
+const cancelTaskBtn = document.getElementById('cancelTaskBtn');
+const saveTaskBtn = document.getElementById('saveTaskBtn');
+
+let currentTasks = {};
+let editingTaskId = null;
+let currentTaskSubtasks = [];
+let currentTaskPriority = 'white';
+let currentTaskTitleColor = 'default';
+
+const APP_VERSION = '1.0.9';
 const VERSION_HISTORY = {
   en: [
+    {
+      version: '1.0.9',
+      date: '2026-04-27',
+      features: [
+        'Tasks now bound to dates like notes',
+        'Added task count indicator on calendar (green)',
+        'Notes and tasks tabs in date view',
+        'Fixed localization for tasks',
+        'Orange color for calendar numbers in dark theme'
+      ]
+    },
+    {
+      version: '1.0.8',
+      date: '2026-04-27',
+      features: [
+        'Added Tasks feature with separate tab',
+        'Tasks can have priority and color',
+        'Subtasks within tasks',
+        'Checkbox for task/subtask completion status',
+        'Task auto-completes when all subtasks done'
+      ]
+    },
     {
       version: '1.0.7',
       date: '2026-04-27',
@@ -111,6 +154,28 @@ const VERSION_HISTORY = {
     }
   ],
 ru: [
+    {
+      version: '1.0.9',
+      date: '2026-04-27',
+      features: [
+        'Задачи теперь привязаны к датам как заметки',
+        'Добавлен индикатор количества задач на календаре (зеленый)',
+        'Вкладки Заметки и Задачи в представлении даты',
+        'Исправлена локализация для задач',
+        'Оранжевый цвет для цифр календаря в темной теме'
+      ]
+    },
+    {
+      version: '1.0.8',
+      date: '2026-04-27',
+      features: [
+        'Добавлена функция Задачи с отдельной вкладкой',
+        'Задачи могут иметь приоритет и цвет',
+        'Подзадачи внутри задач',
+        'Чекбокс для статуса выполнения задачи/подзадачи',
+        'Задача автоматически выполняется когда все подзадачи выполнены'
+      ]
+    },
     {
       version: '1.0.7',
       date: '2026-04-27',
@@ -241,6 +306,7 @@ const translations = {
     editNote: 'Edit Note',
     viewNote: 'View Note',
     noteTitlePlaceholder: 'Note title...',
+    taskTitlePlaceholder: 'Task title...',
     noteContentPlaceholder: 'Write your note...\n(Ctrl+V to paste image)',
     noteContentPlaceholderRu: 'Напишите заметку...\n(Ctrl+V для вставки картинки)',
     addImage: 'Add Image',
@@ -282,7 +348,19 @@ const translations = {
     noteMovedDown: 'Note moved down',
     cannotMoveUp: 'Cannot move up',
     cannotMoveDown: 'Cannot move down',
-    cancelDate: 'Cancel'
+    cancelDate: 'Cancel',
+    addTask: 'Add Task',
+    addTaskBtn: 'Add Task',
+    tabNotes: 'Notes',
+    tabTasks: 'Tasks',
+    noTasks: 'No tasks yet',
+    clickToAddTask: 'Click + to add a task',
+    taskSaved: 'Task saved',
+    taskDeleted: 'Task deleted',
+    editTask: 'Edit Task',
+    addSubtask: 'Add subtask',
+    taskTitlePlaceholder: 'Task title...',
+    addSubtaskPlaceholder: 'Add subtask...'
   },
   ru: {
     appTitle: 'КАЛЕНДАРЬ И ЗАМЕТКИ',
@@ -303,6 +381,7 @@ const translations = {
     editNote: 'Редактировать',
     viewNote: 'Просмотр заметки',
     noteTitlePlaceholder: 'Заголовок заметки...',
+    taskTitlePlaceholder: 'Название задачи...',
     noteContentPlaceholder: 'Напишите заметку...\n(Ctrl+V для вставки картинки)',
     addImage: 'Добавить картинку',
     delete: 'Удалить',
@@ -343,7 +422,19 @@ const translations = {
     noteMovedDown: 'Заметка перемещена вниз',
     cannotMoveUp: 'Нельзя переместить вверх',
     cannotMoveDown: 'Нельзя переместить вниз',
-    cancelDate: 'Отмена'
+    cancelDate: 'Отмена',
+    addTask: 'Добавить задачу',
+    addTaskBtn: 'Добавить задачу',
+    tabNotes: 'Заметки',
+    tabTasks: 'Задачи',
+    noTasks: 'Задач пока нет',
+    clickToAddTask: 'Нажмите + чтобы добавить задачу',
+    taskSaved: 'Задача сохранена',
+    taskDeleted: 'Задача удалена',
+    editTask: 'Редактировать задачу',
+    addSubtask: 'Добавить подзадачу',
+    taskTitlePlaceholder: 'Название задачи...',
+    addSubtaskPlaceholder: 'Добавить подзадачу...'
   }
 };
 
@@ -386,6 +477,11 @@ function setLanguage(lang) {
   document.getElementById('infoButton').title = t('titleInfo');
   document.getElementById('donationTitle').textContent = t('donationTitle');
   document.getElementById('infoTitle').textContent = t('aboutTitle');
+  
+  const tabNotesEl = document.getElementById('tabNotes');
+  const tabTasksEl = document.getElementById('tabTasks');
+  if (tabNotesEl) tabNotesEl.textContent = t('tabNotes');
+  if (tabTasksEl) tabTasksEl.textContent = t('tabTasks');
 
   document.querySelectorAll('.donation-network').forEach(el => {
     const network = el.textContent.split(' - ')[1];
@@ -399,16 +495,37 @@ function setLanguage(lang) {
 
   document.getElementById('modalTitleText').textContent = t('addNote');
   document.getElementById('noteTitle').placeholder = t('noteTitlePlaceholder');
+  
+  const taskTitleInputEl = document.getElementById('taskTitle');
+  if (taskTitleInputEl) taskTitleInputEl.placeholder = t('taskTitlePlaceholder');
+  
+  const subtaskInputEl = document.getElementById('subtaskInput');
+  if (subtaskInputEl) subtaskInputEl.placeholder = t('addSubtaskPlaceholder');
+  
   addImageBtn.querySelector('span').textContent = t('addImage');
   deleteNoteBtn.textContent = t('delete');
   cancelNoteBtn.textContent = t('cancel');
   saveNoteBtn.textContent = t('save');
   addNoteBtn.querySelector('span').textContent = t('addNote');
+  
+  const addTaskBtnNotesEl = document.getElementById('addTaskBtnNotes');
+  if (addTaskBtnNotesEl) {
+    addTaskBtnNotesEl.querySelector('span').textContent = t('addTaskBtn');
+  }
+  
+  const taskModalTitle = document.getElementById('taskModalTitle');
+  if (taskModalTitle) taskModalTitle.textContent = t('addTask');
+  
+  const addSubtaskBtnEl = document.getElementById('addSubtaskBtn');
+  if (addSubtaskBtnEl) addSubtaskBtnEl.textContent = '+ ' + t('addSubtask');
+  
+  if (subtaskInputEl) subtaskInputEl.placeholder = t('addSubtaskPlaceholder');
 
   const placeholder = currentLang === 'ru' ? t('noteContentPlaceholderRu') : t('noteContentPlaceholder');
   noteContentInput.setAttribute('data-placeholder', placeholder);
 
   updateNotesListDisplay();
+  loadTasks();
   updateSelectedDateDisplay();
   updateCalendar();
 
@@ -771,6 +888,287 @@ function hideImagePreview() {
   imagePreviewModal.classList.remove('active');
 }
 
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+function switchTab(tab) {
+  if (tab === 'notes') {
+    tabNotes.classList.add('active');
+    tabTasks.classList.remove('active');
+    editorView.classList.add('active');
+    tasksView.classList.remove('active');
+    calendarView.classList.remove('active');
+  } else {
+    tabTasks.classList.add('active');
+    tabNotes.classList.remove('active');
+    tasksView.classList.add('active');
+    editorView.classList.remove('active');
+    calendarView.classList.remove('active');
+    loadTasks();
+  }
+}
+
+function loadTasks() {
+  const dateKey = formatDate(selectedDate);
+  chrome.storage.local.get(dateKey, (result) => {
+    const dateData = result[dateKey] || {};
+    currentTasks = dateData.tasks || [];
+    renderTasksList();
+  });
+}
+
+function renderTasksList() {
+  const tasksListEl = document.getElementById('tasksList');
+  if (!tasksListEl) return;
+  
+  tasksListEl.innerHTML = '';
+  const tasks = currentTasks || [];
+  
+  if (tasks.length === 0) {
+    tasksListEl.innerHTML = `
+      <div class="no-items">
+        <p>${t('noTasks')}</p>
+        <p class="sub-text">${t('clickToAddTask')}</p>
+      </div>
+    `;
+    return;
+  }
+  
+  tasks.forEach(task => {
+    const taskEl = document.createElement('div');
+    taskEl.className = 'task-item';
+    taskEl.dataset.priority = task.priority || 'white';
+    taskEl.dataset.done = task.done || false;
+    
+    const titleColor = task.titleColor || 'default';
+    const titleColorStyle = titleColor !== 'default' ? `color: ${TITLE_COLORS[titleColor]}` : '';
+    const prioritySymbol = PRIORITY_SYMBOLS[task.priority] || PRIORITY_SYMBOLS.white;
+    const doneSymbol = task.done ? '✅' : '⬜';
+    
+    const subtasksHtml = task.subtasks ? task.subtasks.map(st => `
+      <div class="subtask-item ${st.done ? 'done' : ''}" data-id="${st.id}">
+        <input type="checkbox" class="subtask-checkbox" ${st.done ? 'checked' : ''}>
+        <span>${escapeHtml(st.text)}</span>
+      </div>
+    `).join('') : '';
+    
+    taskEl.innerHTML = `
+      <div class="task-header">
+        <input type="checkbox" class="task-checkbox" ${task.done ? 'checked' : ''}>
+        <div class="task-title" style="${titleColorStyle}">${prioritySymbol} ${escapeHtml(task.title)}</div>
+      </div>
+      <div class="task-subtasks">${subtasksHtml}</div>
+      <div class="task-actions">
+        <button class="edit-task-btn" data-id="${task.id}">✏️</button>
+        <button class="delete-task-btn" data-id="${task.id}">🗑️</button>
+      </div>
+    `;
+    
+    taskEl.querySelector('.task-checkbox').addEventListener('change', (e) => toggleTaskDone(task.id, e.target.checked));
+    taskEl.querySelectorAll('.subtask-checkbox').forEach(cb => {
+      cb.addEventListener('change', (e) => toggleSubtaskDone(task.id, cb.closest('.subtask-item').dataset.id, e.target.checked));
+    });
+    taskEl.querySelector('.edit-task-btn').addEventListener('click', () => openTaskModal(task.id));
+    taskEl.querySelector('.delete-task-btn').addEventListener('click', () => deleteTask(task.id));
+    
+    tasksList.appendChild(taskEl);
+  });
+}
+
+function openTaskModal(taskId = null) {
+  editingTaskId = taskId;
+  currentTaskSubtasks = [];
+  currentTaskPriority = 'white';
+  currentTaskTitleColor = 'default';
+  
+  taskTitleInput.value = '';
+  subtaskInput.value = '';
+  subtasksList.innerHTML = '';
+  
+  document.getElementById('taskModalTitle').textContent = t('addTask');
+  deleteTaskBtn.style.display = taskId ? 'block' : 'none';
+  
+  updateTaskPriorityButtons();
+  updateTaskTitleColorButtons();
+  
+  taskModal.classList.add('active');
+}
+
+function closeTaskModalWindow() {
+  taskModal.classList.remove('active');
+  editingTaskId = null;
+  currentTaskSubtasks = [];
+}
+
+function updateTaskPriorityButtons() {
+  document.querySelectorAll('.task-priority .priority-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.priority === currentTaskPriority);
+  });
+}
+
+function updateTaskTitleColorButtons() {
+  document.querySelectorAll('.task-title-row .title-color-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.color === currentTaskTitleColor);
+  });
+  taskTitleInput.style.color = TITLE_COLORS[currentTaskTitleColor];
+}
+
+function addSubtask() {
+  const text = subtaskInput.value.trim();
+  if (!text) return;
+  
+  currentTaskSubtasks.push({
+    id: generateId(),
+    text: text,
+    done: false
+  });
+  
+  subtaskInput.value = '';
+  renderSubtasksList();
+}
+
+function renderSubtasksList() {
+  subtasksList.innerHTML = currentTaskSubtasks.map(st => `
+    <div class="subtask-item" data-id="${st.id}">
+      <span>${escapeHtml(st.text)}</span>
+      <button class="remove-subtask-btn" data-id="${st.id}">×</button>
+    </div>
+  `).join('');
+  
+  subtasksList.querySelectorAll('.remove-subtask-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentTaskSubtasks = currentTaskSubtasks.filter(st => st.id !== btn.dataset.id);
+      renderSubtasksList();
+    });
+  });
+}
+
+function saveTask() {
+  const dateKey = formatDate(selectedDate);
+  const title = taskTitleInput.value.trim();
+  
+  if (!title) {
+    closeTaskModalWindow();
+    return;
+  }
+  
+  chrome.storage.local.get(dateKey, (result) => {
+    const dateData = result[dateKey] || { notes: [], priority: 'white', tasks: [] };
+    let tasks = dateData.tasks || [];
+    
+    const newTask = {
+      id: editingTaskId || generateId(),
+      title: title,
+      priority: currentTaskPriority,
+      titleColor: currentTaskTitleColor,
+      subtasks: currentTaskSubtasks,
+      done: false,
+      created: new Date().toISOString(),
+      modified: new Date().toISOString()
+    };
+    
+    if (editingTaskId) {
+      const taskIndex = tasks.findIndex(t => t.id === editingTaskId);
+      if (taskIndex !== -1) {
+        newTask.created = tasks[taskIndex].created;
+        newTask.done = tasks[taskIndex].done;
+        tasks.splice(taskIndex, 1);
+      }
+    }
+    
+    tasks.push(newTask);
+    dateData.tasks = tasks;
+    
+    chrome.storage.local.set({ [dateKey]: dateData }, () => {
+      currentTasks = tasks;
+      renderTasksList();
+      updateCalendar();
+      closeTaskModalWindow();
+      showNotification(t('taskSaved'));
+      logger.info('Task saved', { taskId: newTask.id, date: dateKey });
+    });
+  });
+}
+
+function toggleTaskDone(taskId, done) {
+  const dateKey = formatDate(selectedDate);
+  
+  chrome.storage.local.get(dateKey, (result) => {
+    const dateData = result[dateKey] || { notes: [], priority: 'white', tasks: [] };
+    let tasks = dateData.tasks || [];
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    task.done = done;
+    task.modified = new Date().toISOString();
+    
+    if (done && task.subtasks && task.subtasks.length > 0) {
+      task.subtasks.forEach(st => st.done = true);
+    }
+    
+    dateData.tasks = tasks;
+    
+    chrome.storage.local.set({ [dateKey]: dateData }, () => {
+      currentTasks = tasks;
+      renderTasksList();
+      updateCalendar();
+      logger.info('Task toggled', { taskId, done, date: dateKey });
+    });
+  });
+}
+
+function toggleSubtaskDone(taskId, subtaskId, done) {
+  const dateKey = formatDate(selectedDate);
+  
+  chrome.storage.local.get(dateKey, (result) => {
+    const dateData = result[dateKey] || { notes: [], priority: 'white', tasks: [] };
+    let tasks = dateData.tasks || [];
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || !task.subtasks) return;
+  
+  const subtask = task.subtasks.find(st => st.id === subtaskId);
+  if (subtask) {
+    subtask.done = done;
+    task.modified = new Date().toISOString();
+    
+    if (task.subtasks.length > 0 && task.subtasks.every(st => st.done)) {
+      task.done = true;
+    }
+    
+    dateData.tasks = tasks;
+    
+    chrome.storage.local.set({ [dateKey]: dateData }, () => {
+      currentTasks = tasks;
+      renderTasksList();
+      updateCalendar();
+    });
+  }
+});
+}
+
+function deleteTask(taskId) {
+  if (!taskId) return;
+  
+  const dateKey = formatDate(selectedDate);
+  
+  chrome.storage.local.get(dateKey, (result) => {
+    const dateData = result[dateKey] || { notes: [], priority: 'white', tasks: [] };
+    let tasks = dateData.tasks || [];
+    
+    tasks = tasks.filter(t => t.id !== taskId);
+    dateData.tasks = tasks;
+    
+    chrome.storage.local.set({ [dateKey]: dateData }, () => {
+      currentTasks = tasks;
+      renderTasksList();
+      updateCalendar();
+      showNotification(t('taskDeleted'));
+      logger.info('Task deleted', { taskId, date: dateKey });
+    });
+  });
+}
+
 function saveNote() {
   const dateKey = formatDate(selectedDate);
   const title = noteTitleInput.value.trim();
@@ -1009,6 +1407,16 @@ function updateCalendar() {
       dayElement.appendChild(noteIndicator);
     }
 
+    if (currentNotes[dateKey] && currentNotes[dateKey].tasks && currentNotes[dateKey].tasks.length > 0) {
+      const taskCount = currentNotes[dateKey].tasks.length;
+      
+      const taskIndicator = document.createElement('span');
+      taskIndicator.className = 'task-indicator';
+      taskIndicator.textContent = taskCount;
+      taskIndicator.title = t('tabTasks');
+      dayElement.appendChild(taskIndicator);
+    }
+
     if (dateObj.getDate() === new Date().getDate() &&
         dateObj.getMonth() === new Date().getMonth() &&
         dateObj.getFullYear() === new Date().getFullYear()) {
@@ -1046,15 +1454,34 @@ function updateCalendar() {
 function switchToEditor() {
   logView.classList.remove('active');
   calendarView.classList.remove('active');
+  tasksView.classList.remove('active');
+  
+  const notesListEl = document.getElementById('notesList');
+  const tasksListEl = document.getElementById('tasksList');
+  const addNoteBtnEl = document.getElementById('addNoteBtn');
+  const addTaskBtnEl = document.getElementById('addTaskBtnNotes');
+  const tabNotesEl = document.getElementById('tabNotes');
+  const tabTasksEl = document.getElementById('tabTasks');
+  
+  if (tabNotesEl) tabNotesEl.classList.add('active');
+  if (tabTasksEl) tabTasksEl.classList.remove('active');
+  if (notesListEl) notesListEl.style.display = 'block';
+  if (tasksListEl) tasksListEl.style.display = 'none';
+  if (addNoteBtnEl) addNoteBtnEl.style.display = 'flex';
+  if (addTaskBtnEl) addTaskBtnEl.style.display = 'none';
+  
   setTimeout(() => {
     editorView.classList.add('active');
     updateSelectedDateDisplay();
+    renderNotesList();
+    loadTasks();
   }, 50);
 }
 
 function switchToCalendar() {
   logView.classList.remove('active');
   editorView.classList.remove('active');
+  tasksView.classList.remove('active');
   setTimeout(() => {
     calendarView.classList.add('active');
     updateCalendar();
@@ -1099,6 +1526,72 @@ function loadLogs() {
 function setupEventListeners() {
   document.getElementById('langEN').addEventListener('click', () => setLanguage('en'));
   document.getElementById('langRU').addEventListener('click', () => setLanguage('ru'));
+
+  const addTaskBtnNotes = document.getElementById('addTaskBtnNotes');
+  
+  if (addTaskBtnNotes) {
+    addTaskBtnNotes.addEventListener('click', () => openTaskModal());
+  }
+
+  if (tabNotes && tabTasks) {
+    tabNotes.addEventListener('click', () => {
+      tabNotes.classList.add('active');
+      tabTasks.classList.remove('active');
+      
+      const notesListEl = document.getElementById('notesList');
+      const tasksListEl = document.getElementById('tasksList');
+      const addNoteBtnEl = document.getElementById('addNoteBtn');
+      const addTaskBtnEl = document.getElementById('addTaskBtnNotes');
+      
+      if (notesListEl) notesListEl.style.display = 'block';
+      if (tasksListEl) tasksListEl.style.display = 'none';
+      if (addNoteBtnEl) addNoteBtnEl.style.display = 'flex';
+      if (addTaskBtnEl) addTaskBtnEl.style.display = 'none';
+      
+      renderNotesList();
+    });
+    
+    tabTasks.addEventListener('click', () => {
+      tabTasks.classList.add('active');
+      tabNotes.classList.remove('active');
+      
+      const notesListEl = document.getElementById('notesList');
+      const tasksListEl = document.getElementById('tasksList');
+      const addNoteBtnEl = document.getElementById('addNoteBtn');
+      const addTaskBtnEl = document.getElementById('addTaskBtnNotes');
+      
+      if (notesListEl) notesListEl.style.display = 'none';
+      if (tasksListEl) tasksListEl.style.display = 'block';
+      if (addNoteBtnEl) addNoteBtnEl.style.display = 'none';
+      if (addTaskBtnEl) addTaskBtnEl.style.display = 'flex';
+      
+      loadTasks();
+    });
+  }
+
+  if (addTaskBtn) {
+    addTaskBtn.addEventListener('click', () => openTaskModal());
+  }
+  closeTaskBtn.addEventListener('click', closeTaskModalWindow);
+  cancelTaskBtn.addEventListener('click', closeTaskModalWindow);
+  saveTaskBtn.addEventListener('click', saveTask);
+  deleteTaskBtn.addEventListener('click', () => deleteTask(editingTaskId));
+  addSubtaskBtn.addEventListener('click', addSubtask);
+  subtaskInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addSubtask(); });
+
+  document.querySelectorAll('.task-priority .priority-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      currentTaskPriority = e.target.dataset.priority;
+      updateTaskPriorityButtons();
+    });
+  });
+
+  document.querySelectorAll('.task-title-row .title-color-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      currentTaskTitleColor = e.target.dataset.color;
+      updateTaskTitleColorButtons();
+    });
+  });
 
   calendarButton.addEventListener('click', () => {
     logger.debug('Calendar button clicked');
@@ -1299,12 +1792,27 @@ function setupEventListeners() {
               if (importedValue.priority) {
                 mergedData[dateKey].priority = importedValue.priority;
               }
+              
+              if (importedValue.tasks && importedValue.tasks.length > 0) {
+                if (!mergedData[dateKey].tasks) {
+                  mergedData[dateKey].tasks = [];
+                }
+                
+                for (const importedTask of importedValue.tasks) {
+                  const newTask = { ...importedTask };
+                  if (!newTask.id) {
+                    newTask.id = generateId();
+                  }
+                  mergedData[dateKey].tasks.push(newTask);
+                }
+              }
             }
             
             chrome.storage.local.set(mergedData, () => {
               currentNotes = mergedData;
               updateCalendar();
               loadNotesForDate(formatDate(selectedDate));
+              loadTasks();
               showNotification(t('imported'));
               logger.info('Data imported and merged', { version: importData.version });
             });

@@ -74,14 +74,27 @@
         </div>
       </div>
       
-      <div id="notesList" class="notes-list"></div>
+      <div class="content-tabs">
+        <button id="tabNotes" class="content-tab active" data-i18n="tabNotes">Заметки</button>
+        <button id="tabTasks" class="content-tab" data-i18n="tabTasks">Задачи</button>
+      </div>
       
-      <button id="addNoteBtn" class="add-note-btn">
+      <div id="notesList" class="notes-list"></div>
+      <div id="tasksList" class="tasks-list" style="display: none;"></div>
+      
+      <button id="addNoteBtn" class="add-item-btn">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
-        <span class="add-note-text">Add Note</span>
+        <span class="add-note-text" data-i18n="addNote">Add Note</span>
+      </button>
+      <button id="addTaskBtnNotes" class="add-item-btn add-task-btn" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span data-i18n="addTask">Add Task</span>
       </button>
     </div>
 
@@ -110,6 +123,19 @@
       </div>
       
       <div id="calendarDays" class="calendar-grid"></div>
+    </div>
+
+    <div id="tasksView" class="view">
+      <div class="tasks-header">
+        <h2>Tasks</h2>
+        <button id="addTaskBtn" class="icon-button" title="Add Task">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+      <div id="tasksList" class="tasks-list"></div>
     </div>
 
     <div id="logView" class="view">
@@ -147,7 +173,7 @@
         </div>
         <div class="modal-body">
           <div class="note-title-row">
-            <input type="text" id="noteTitle" class="note-title-input" placeholder="Note title...">
+            <input type="text" id="noteTitle" class="note-title-input" data-i18n-placeholder="noteTitlePlaceholder" placeholder="Note title...">
             <div class="title-color-buttons">
               <button class="title-color-btn" data-color="default" style="background:#1e40af"></button>
               <button class="title-color-btn" data-color="red" style="background:#ef4444"></button>
@@ -174,6 +200,49 @@
             <button id="editNoteBtn" class="secondary-btn"><span class="edit-note-text">Edit</span></button>
             <button id="cancelNoteBtn" class="secondary-btn">Cancel</button>
             <button id="saveNoteBtn" class="primary-btn">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="taskModal" class="modal">
+      <div class="modal-content task-modal">
+        <div class="modal-header">
+          <h3 id="taskModalTitle">Add Task</h3>
+          <div class="priority-buttons task-priority">
+            <button class="priority-btn" data-priority="white">🔘</button>
+            <button class="priority-btn" data-priority="green">🟢</button>
+            <button class="priority-btn" data-priority="orange">🟠</button>
+            <button class="priority-btn" data-priority="red">🔴</button>
+          </div>
+          <button id="closeTaskModal" class="icon-button small">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="task-title-row">
+            <input type="text" id="taskTitle" class="task-title-input" data-i18n-placeholder="taskTitlePlaceholder" placeholder="Task title...">
+            <div class="title-color-buttons">
+              <button class="title-color-btn" data-color="default" style="background:#1e40af"></button>
+              <button class="title-color-btn" data-color="red" style="background:#ef4444"></button>
+              <button class="title-color-btn" data-color="green" style="background:#22c55e"></button>
+              <button class="title-color-btn" data-color="orange" style="background:#f97316"></button>
+              <button class="title-color-btn" data-color="purple" style="background:#8b5cf6"></button>
+              <button class="title-color-btn" data-color="pink" style="background:#ec4899"></button>
+            </div>
+          </div>
+          <div id="subtasksList" class="subtasks-list"></div>
+          <input type="text" id="subtaskInput" class="subtask-input" placeholder="Add subtask...">
+          <button id="addSubtaskBtn" class="add-subtask-btn">+ Add Subtask</button>
+        </div>
+        <div class="modal-footer">
+          <button id="deleteTaskBtn" class="danger-btn">Delete</button>
+          <div class="modal-actions">
+            <button id="cancelTaskBtn" class="secondary-btn">Cancel</button>
+            <button id="saveTaskBtn" class="primary-btn">Save</button>
           </div>
         </div>
       </div>
