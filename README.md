@@ -40,10 +40,8 @@
 ### 📚 Versioning
 - Automatic version history.
 - Change history in "About" window.
-- **Side Panel mode** - extension stays open while browsing (Alt+N).
 
-### ⌨️ Keyboard Shortcuts
-- `Alt+N` - Toggle Side Panel mode
+---
 
 ## 📦 Installation
 
@@ -88,8 +86,7 @@ Full video instruction on extension installation and functionality.
 
 ```
 PAPA-CALENDARIES-NOTES/
-├── popup.html          # Extension popup interface
-├── sidepanel.html     # Side panel interface (Alt+N)
+├── popup.html          # Extension interface
 ├── script.js           # Working logic
 ├── styles.css          # Styles (dark/light theme)
 ├── logger.js           # Logging system
