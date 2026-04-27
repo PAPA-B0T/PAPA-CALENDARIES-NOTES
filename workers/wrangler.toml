@@ -1,0 +1,7 @@
+name = "papa-calendaries-reminder"
+main = "reminder-worker.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "REMINDERS"
+id = "YOUR_KV_NAMESPACE_ID"

@@ -1792,3 +1792,185 @@ button {
 .done-time {
   color: #27ae60;
 }
+
+#settingsModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.95);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#settingsModal.active {
+  display: flex;
+}
+
+#settingsModal .modal-content {
+  max-width: 700px;
+  max-height: 90vh;
+  width: 100%;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow-y: auto;
+}
+
+#settingsModal .modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#settingsModal .modal-header h3 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--text-primary);
+}
+
+#settingsModal .modal-body {
+  padding: 20px;
+}
+
+#settingsModal .settings-body {
+  padding: 20px;
+}
+
+#settingsModal .settings-section {
+  margin-bottom: 20px;
+}
+
+#settingsModal .settings-section h4 {
+  margin: 0 0 10px 0;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+#settingsModal .settings-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 15px;
+}
+
+#settingsModal .form-group {
+  margin-bottom: 15px;
+}
+
+#settingsModal .form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+#settingsModal .form-group .input-field {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+#settingsModal .form-group .input-field:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+#settingsModal .checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+#settingsModal .checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+#settingsModal .telegram-instructions {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  font-size: 12px;
+}
+
+#settingsModal .telegram-instructions p {
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+#settingsModal .telegram-instructions strong {
+  color: var(--text-primary);
+}
+
+#settingsModal .telegram-instructions a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+#settingsModal .telegram-instructions a:hover {
+  text-decoration: underline;
+}
+
+#settingsModal .telegram-instructions code {
+  background: var(--bg-primary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #e74c3c;
+  word-break: break-all;
+}
+
+#settingsModal .modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 20px;
+}
+
+#settingsModal .webhook-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+#settingsModal .webhook-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+#settingsModal .webhook-btn.primary-btn {
+  background-color: #27ae60;
+  color: white;
+}
+
+#settingsModal .webhook-btn.primary-btn:hover {
+  background-color: #219a52;
+}
+
+#settingsModal .webhook-btn.delete-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+#settingsModal .webhook-btn.delete-btn:hover {
+  background-color: #c0392b;
+}

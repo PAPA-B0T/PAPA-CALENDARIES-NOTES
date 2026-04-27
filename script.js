@@ -46,7 +46,7 @@ let currentTaskSubtasks = [];
 let currentTaskPriority = 'white';
 let currentTaskTitleColor = 'default';
 
-const APP_VERSION = '1.1.1';
+const APP_VERSION = '1.1.2';
 const VERSION_HISTORY = {
   en: [
     {
@@ -58,6 +58,17 @@ const VERSION_HISTORY = {
         'Date in tasks/subtasks now light red (#ff6b6b), time is green (#27ae60)',
         'Notes indicator now shows tooltip "Notes"/"Notes" on hover',
         'Edit note button now blue color'
+      ]
+    },
+    {
+      version: '1.1.2',
+      date: '2026-04-27',
+      features: [
+        'Added Telegram notifications settings with step-by-step instructions',
+        'Fixed: settings now open in full-screen modal',
+        'All settings text translated to EN/RU',
+        'Added Set connection and Delete connection buttons for webhook',
+        'Fixed links in instructions to be clickable'
       ]
     },
     {
@@ -384,6 +395,7 @@ const translations = {
     titleExport: 'Export',
     titleImport: 'Import',
     titleInfo: 'About',
+    titleSettings: 'Settings',
     aboutTitle: 'About Extension ' + APP_VERSION,
     versionLabel: 'Version',
     imported: 'Data imported and merged',
@@ -392,6 +404,7 @@ const translations = {
     moveUp: 'Move up',
     moveDown: 'Move down',
     moveToDate: 'Move to date',
+    setReminder: 'Set reminder',
     selectDate: 'Select date',
     noteMoved: 'Note moved',
     noteMovedUp: 'Note moved up',
@@ -399,6 +412,38 @@ const translations = {
     cannotMoveUp: 'Cannot move up',
     cannotMoveDown: 'Cannot move down',
     cancelDate: 'Cancel',
+    reminderTitle: 'Set Reminder',
+    reminderTime: 'Reminder time',
+    reminderDate: 'Reminder date',
+    reminderRepeat: 'Repeat after',
+    reminderNone: 'No repeat',
+    reminderDaily: 'Daily',
+    reminderWeekly: 'Weekly',
+    reminderMonthly: 'Monthly',
+    reminderHours: 'hours',
+    reminderMinutes: 'minutes',
+    remindersList: 'Reminders',
+    noReminders: 'No reminders',
+    deleteReminder: 'Delete reminder',
+    reminderSaved: 'Reminder saved',
+    reminderDeleted: 'Reminder deleted',
+    telegramNotifications: 'Telegram Notifications',
+    telegramSetupInfo: 'Follow these steps to enable notifications:',
+    step1Title: 'Step 1: Create Telegram Bot',
+    step1Desc: '1. Open <a href="https://t.me/BotFather" target="_blank">@BotFather</a> in Telegram\n2. Send /newbot\n3. Enter name and username\n4. Copy bot token',
+    step2Title: 'Step 2: Get Chat ID',
+    step2Desc: '1. Open <a href="https://t.me/userinfobot" target="_blank">@userinfobot</a> bot\n2. Click Start\n3. Bot will show your Chat ID (number)',
+    step3Title: 'Step 3: Deploy Worker',
+    step3Desc: '1. Go to <a href="https://dash.cloudflare.com/" target="_blank">cloudflare.com</a> → Workers\n2. Create new worker, <a href="https://github.com/PAPA-B0T/PAPA-CALENDARIES-NOTES/blob/main/workers/reminder-worker.js" target="_blank">paste this code</a>\n3. Go to Settings → Variables\n4. Add BOT_TOKEN variable with your bot token\n5. Go to KV → Create namespace "REMINDERS"\n6. In Worker Settings → Add KV Namespace Binding: name="REMINDERS", namespace=REMINDERS',
+    step4Title: 'Step 4: Setup Cron',
+    step4Desc: '1. Go to <a href="https://cron-job.org" target="_blank">cron-job.org</a>\n2. Create job: URL = your worker URL + /check (e.g., https://my-worker.workers.dev/check)\n3. Schedule: Every minute',
+    workerUrlLabel: 'Worker URL:',
+    botTokenLabel: 'Bot Token:',
+    chatIdLabel: 'Chat ID:',
+    enableNotifications: 'Enable notifications',
+    testNotification: 'Test notification',
+    setWebhook: 'Set connection',
+    deleteWebhook: 'Delete connection',
     addTask: 'Add Task',
     addTaskBtn: 'Add Task',
     tabNotes: 'Notes',
@@ -460,6 +505,7 @@ const translations = {
     titleExport: 'Экспорт',
     titleImport: 'Импорт',
     titleInfo: 'О расширении',
+    titleSettings: 'Настройки',
     aboutTitle: 'О расширении ' + APP_VERSION,
     versionLabel: 'Версия',
     imported: 'Данные импортированы и объединены',
@@ -468,6 +514,7 @@ const translations = {
     moveUp: 'Переместить вверх',
     moveDown: 'Переместить вниз',
     moveToDate: 'Перенести на дату',
+    setReminder: 'Установить напоминание',
     selectDate: 'Выберите дату',
     noteMoved: 'Заметка перенесена',
     noteMovedUp: 'Заметка перемещена вверх',
@@ -475,6 +522,38 @@ const translations = {
     cannotMoveUp: 'Нельзя переместить вверх',
     cannotMoveDown: 'Нельзя переместить вниз',
     cancelDate: 'Отмена',
+    reminderTitle: 'Установить напоминание',
+    reminderTime: 'Время напоминания',
+    reminderDate: 'Дата напоминания',
+    reminderRepeat: 'Повторять',
+    reminderNone: 'Без повтора',
+    reminderDaily: 'Каждый день',
+    reminderWeekly: 'Каждую неделю',
+    reminderMonthly: 'Каждый месяц',
+    reminderHours: 'часов',
+    reminderMinutes: 'минут',
+    remindersList: 'Напоминания',
+    noReminders: 'Нет напоминаний',
+    deleteReminder: 'Удалить напоминание',
+    reminderSaved: 'Напоминание сохранено',
+    reminderDeleted: 'Напоминание удалено',
+    telegramNotifications: 'Telegram уведомления',
+    telegramSetupInfo: 'Следуйте этим шагам для включения уведомлений:',
+    step1Title: 'Шаг 1: Создание Telegram бота',
+    step1Desc: '1. Откройте <a href="https://t.me/BotFather" target="_blank">@BotFather</a> в Telegram\n2. Отправьте /newbot\n3. Введите имя и username\n4. Скопируйте токен бота',
+    step2Title: 'Шаг 2: Получение Chat ID',
+    step2Desc: '1. Откройте бота <a href="https://t.me/userinfobot" target="_blank">@userinfobot</a>\n2. Нажмите Start\n3. Бот покажет ваш Chat ID (число)',
+    step3Title: 'Шаг 3: Деплой Worker',
+    step3Desc: '1. Перейдите на <a href="https://dash.cloudflare.com/" target="_blank">cloudflare.com</a> → Workers\n2. Создайте новый worker, <a href="https://github.com/PAPA-B0T/PAPA-CALENDARIES-NOTES/blob/main/workers/reminder-worker.js" target="_blank">вставьте этот код</a>\n3. Перейдите в Settings → Variables\n4. Добавьте переменную BOT_TOKEN с токеном вашего бота\n5. Перейдите в KV → Создайте namespace "REMINDERS"\n6. В настройках Worker → Add KV Namespace Binding: name="REMINDERS", namespace=REMINDERS',
+    step4Title: 'Шаг 4: Настройка Cron',
+    step4Desc: '1. Перейдите на <a href="https://cron-job.org" target="_blank">cron-job.org</a>\n2. Создайте задачу: URL = ваш worker URL + /check (например: https://мой-worker.workers.dev/check)\n3. Расписание: Каждую минуту',
+    workerUrlLabel: 'URL Worker:',
+    botTokenLabel: 'Токен бота:',
+    chatIdLabel: 'Chat ID:',
+    enableNotifications: 'Включить уведомления',
+    testNotification: 'Тест уведомления',
+    setWebhook: 'Установить связь',
+    deleteWebhook: 'Удалить связь',
     addTask: 'Добавить задачу',
     addTaskBtn: 'Добавить задачу',
     tabNotes: 'Заметки',
@@ -529,8 +608,11 @@ function setLanguage(lang) {
   document.getElementById('exportButton').title = t('titleExport');
   document.getElementById('importButton').title = t('titleImport');
   document.getElementById('infoButton').title = t('titleInfo');
+  const settingsBtn = document.getElementById('settingsButton');
+  if (settingsBtn) settingsBtn.title = t('titleSettings');
   document.getElementById('donationTitle').textContent = t('donationTitle');
   document.getElementById('infoTitle').textContent = t('aboutTitle');
+  document.getElementById('settingsTitle').textContent = t('titleSettings');
   
   const tabNotesEl = document.getElementById('tabNotes');
   const tabTasksEl = document.getElementById('tabTasks');
@@ -726,6 +808,7 @@ function renderNotesList() {
         ${hasImages ? `<span class="note-images-count">🖼️</span>` : ''}
       </div>
       <div class="note-actions">
+        <button class="reminder-note-btn" data-id="${note.id}" title="${t('setReminder')}">🔔📱</button>
         <button class="move-note-btn move-up" data-id="${note.id}" title="${t('moveUp')}">⬆️</button>
         <button class="move-note-btn move-date" data-id="${note.id}" title="${t('moveToDate')}">🔁</button>
         <button class="move-note-btn move-down" data-id="${note.id}" title="${t('moveDown')}">⬇️</button>
@@ -1041,6 +1124,7 @@ function renderTasksList() {
       </div>
       <div class="task-subtasks">${subtasksHtml}</div>
       <div class="task-actions">
+        <button class="reminder-task-btn" data-id="${task.id}" title="${t('setReminder')}">🔔📱</button>
         <button class="edit-task-btn" data-id="${task.id}" title="${t('editTooltip')}">✏️</button>
         <button class="delete-task-btn" data-id="${task.id}" title="${t('deleteTooltip')}">🗑️</button>
       </div>
@@ -1959,6 +2043,80 @@ function setupEventListeners() {
     renderVersionHistory();
     infoModal.classList.add('active');
   });
+
+  const settingsButton = document.getElementById('settingsButton');
+  const settingsModal = document.getElementById('settingsModal');
+  const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+  const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+  const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+
+  if (settingsButton) {
+    logger.info('settingsButton clicked');
+    settingsButton.addEventListener('click', () => {
+      logger.info('Opening settings modal', { settingsModalExists: !!settingsModal });
+      loadSettings();
+      if (settingsModal) {
+        settingsModal.classList.add('active');
+        logger.info('Added active class to settingsModal');
+      } else {
+        logger.error('settingsModal is null!');
+      }
+    });
+  }
+
+  if (closeSettingsBtn) {
+    closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('active'));
+  }
+
+  if (cancelSettingsBtn) {
+    cancelSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('active'));
+  }
+
+  if (settingsModal) {
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) settingsModal.classList.remove('active');
+    });
+  }
+
+  if (saveSettingsBtn) {
+    saveSettingsBtn.addEventListener('click', saveSettings);
+  }
+
+  function loadSettings() {
+    logger.info('loadSettings called');
+    const settingsModal = document.getElementById('settingsModal');
+    logger.info('loadSettings: settingsModal found', { exists: !!settingsModal });
+    if (settingsModal) {
+      settingsModal.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (key && t(key)) el.innerHTML = t(key);
+      });
+    }
+    chrome.storage.local.get(['telegramWorkerUrl', 'telegramBotToken', 'telegramChatId', 'telegramEnabled'], (data) => {
+      document.getElementById('workerUrlInput').value = data.telegramWorkerUrl || '';
+      document.getElementById('botTokenInput').value = data.telegramBotToken || '';
+      document.getElementById('chatIdInput').value = data.telegramChatId || '';
+      document.getElementById('telegramEnabled').checked = data.telegramEnabled || false;
+    });
+  }
+
+  function saveSettings() {
+    const workerUrl = document.getElementById('workerUrlInput').value.trim();
+    const botToken = document.getElementById('botTokenInput').value.trim();
+    const chatId = document.getElementById('chatIdInput').value.trim();
+    const enabled = document.getElementById('telegramEnabled').checked;
+    
+    chrome.storage.local.set({
+      telegramWorkerUrl: workerUrl,
+      telegramBotToken: botToken,
+      telegramChatId: chatId,
+      telegramEnabled: enabled
+    }, () => {
+      settingsModal.classList.remove('active');
+      showNotification(currentLang === 'ru' ? 'Настройки сохранены' : 'Settings saved');
+      logger.info('Settings saved', { telegramEnabled: enabled });
+    });
+  }
 
   closeInfoBtn.addEventListener('click', () => {
     infoModal.classList.remove('active');

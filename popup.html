@@ -49,6 +49,12 @@
         </button>
         <div class="actions-right">
           <button id="donationButton" class="icon-button" title="Пожертвование на развитие">$</button>
+          <button id="settingsButton" class="icon-button" title="Settings">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
           <button id="infoButton" class="icon-button" title="About">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
@@ -312,6 +318,70 @@
           </button>
         </div>
         <div class="modal-body info-body" id="versionHistory"></div>
+      </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+      <div class="modal-content settings-modal">
+        <div class="modal-header">
+          <h3 id="settingsTitle" data-i18n="titleSettings">Настройки</h3>
+          <button id="closeSettingsBtn" class="icon-button small">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body settings-body">
+          <div class="settings-section">
+            <h4 data-i18n="telegramNotifications">Telegram Notifications</h4>
+            <p class="settings-desc" data-i18n="telegramSetupInfo">Follow these steps to enable notifications:</p>
+            
+            <div class="telegram-instructions">
+              <p><strong data-i18n="step1Title">Step 1: Create Telegram Bot</strong></p>
+              <p data-i18n="step1Desc">1. Open @BotFather in Telegram<br>2. Send /newbot<br>3. Enter name and username<br>4. Copy bot token</p>
+              
+              <p><strong data-i18n="step2Title">Step 2: Get Chat ID</strong></p>
+              <p data-i18n="step2Desc">1. Open your bot<br>2. Send /start<br>3. Visit: https://api.telegram.org/bot[TOKEN]/getUpdates<br>4. Find "chat":{"id":YOUR_ID}</p>
+              
+              <p><strong data-i18n="step3Title">Step 3: Deploy Worker</strong></p>
+              <p data-i18n="step3Desc">1. Go to cloudflare.com → Workers<br>2. Create new worker, paste code from workers/reminder-worker.js<br>3. Add variable BOT_TOKEN with your token<br>4. Create KV namespace "REMINDERS" and bind it<br>5. Set webhook: https://api.telegram.org/bot[TOKEN]/setWebhook?url=https://[YOUR-WORKER].workers.dev/webhook</p>
+              
+              <p><strong data-i18n="step4Title">Step 4: Setup Cron</strong></p>
+              <p data-i18n="step4Desc">1. Go to cron-job.org<br>2. Create job: URL=https://[YOUR-WORKER].workers.dev/check<br>3. Schedule: Every minute</p>
+            </div>
+            
+            <div class="form-group">
+              <label id="workerUrlLabel" data-i18n="workerUrlLabel">Worker URL:</label>
+              <input type="text" id="workerUrlInput" class="input-field" placeholder="https://your-worker.workers.dev">
+            </div>
+            <div class="form-group">
+              <label id="botTokenLabel" data-i18n="botTokenLabel">Bot Token:</label>
+              <input type="text" id="botTokenInput" class="input-field" placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
+            </div>
+            <div class="form-group">
+              <label id="chatIdLabel" data-i18n="chatIdLabel">Chat ID:</label>
+              <input type="text" id="chatIdInput" class="input-field" placeholder="123456789">
+            </div>
+            <div class="form-group checkbox-group">
+              <label>
+                <input type="checkbox" id="telegramEnabled">
+                <span id="telegramEnabledLabel" data-i18n="enableNotifications">Enable notifications</span>
+              </label>
+            </div>
+            <button id="testTelegramBtn" class="secondary-btn" data-i18n="testNotification">Test notification</button>
+            <div class="webhook-buttons">
+              <button id="setWebhookBtn" class="primary-btn webhook-btn" data-i18n="setWebhook">Set connection</button>
+              <button id="deleteWebhookBtn" class="delete-btn webhook-btn" data-i18n="deleteWebhook">Delete connection</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="modal-actions">
+            <button id="saveSettingsBtn" class="primary-btn" data-i18n="save">Save</button>
+            <button id="cancelSettingsBtn" class="secondary-btn" data-i18n="cancel">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
