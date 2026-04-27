@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "PAPA CALENDARIES NOTES",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "A lightweight, private browser extension for quick daily reflections and thoughts",
     "permissions": ["storage"],
     "action": {
@@ -10,6 +10,18 @@
         "16": "icon.png",
         "48": "icon.png",
         "128": "icon.png"
+      }
+    },
+    "side_panel": {
+      "default_path": "sidepanel.html"
+    },
+    "commands": {
+      "toggle-side-panel": {
+        "suggested_key": {
+          "default": "Alt+N",
+          "mac": "Alt+N"
+        },
+        "description": "Toggle side panel"
       }
     },
     "icons": {
