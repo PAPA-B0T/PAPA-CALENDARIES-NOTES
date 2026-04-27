@@ -25,9 +25,18 @@ const infoModal = document.getElementById('infoModal');
 const closeInfoBtn = document.getElementById('closeInfoBtn');
 const versionHistory = document.getElementById('versionHistory');
 
-const APP_VERSION = '1.0.4';
+const APP_VERSION = '1.0.5';
 const VERSION_HISTORY = {
   en: [
+    {
+      version: '1.0.5',
+      date: '2026-04-27',
+      features: [
+        'Added move note up/down buttons (⬆️/⬇️) for each note',
+        'Added move note to date button (🔁) - allows moving note to any date',
+        'New date picker modal for selecting destination date'
+      ]
+    },
     {
       version: '1.0.4',
       date: '2026-04-25',
@@ -84,6 +93,15 @@ const VERSION_HISTORY = {
     }
   ],
   ru: [
+    {
+      version: '1.0.5',
+      date: '2026-04-27',
+      features: [
+        'Добавлены кнопки перемещения заметки вверх/вниз (⬆️/⬇️) для каждой заметки',
+        'Добавлена кнопка переноса заметки на дату (🔁) - позволяет перенести заметку на любую дату',
+        'Новое модальное окно выбора даты для выбора целевой даты'
+      ]
+    },
     {
       version: '1.0.4',
       date: '2026-04-25',
@@ -217,7 +235,17 @@ const translations = {
     versionLabel: 'Version',
     imported: 'Data imported and merged',
     versionDate: 'Release date',
-    featuresLabel: 'Features'
+    featuresLabel: 'Features',
+    moveUp: 'Move up',
+    moveDown: 'Move down',
+    moveToDate: 'Move to date',
+    selectDate: 'Select date',
+    noteMoved: 'Note moved',
+    noteMovedUp: 'Note moved up',
+    noteMovedDown: 'Note moved down',
+    cannotMoveUp: 'Cannot move up',
+    cannotMoveDown: 'Cannot move down',
+    cancelDate: 'Cancel'
   },
   ru: {
     appTitle: 'КАЛЕНДАРЬ И ЗАМЕТКИ',
@@ -267,7 +295,17 @@ const translations = {
     versionLabel: 'Версия',
     imported: 'Данные импортированы и объединены',
     versionDate: 'Дата выпуска',
-    featuresLabel: 'Возможности'
+    featuresLabel: 'Возможности',
+    moveUp: 'Переместить вверх',
+    moveDown: 'Переместить вниз',
+    moveToDate: 'Перенести на дату',
+    selectDate: 'Выберите дату',
+    noteMoved: 'Заметка перенесена',
+    noteMovedUp: 'Заметка перемещена вверх',
+    noteMovedDown: 'Заметка перемещена вниз',
+    cannotMoveUp: 'Нельзя переместить вверх',
+    cannotMoveDown: 'Нельзя переместить вниз',
+    cancelDate: 'Отмена'
   }
 };
 
@@ -444,7 +482,7 @@ function renderNotesList() {
     return;
   }
 
-  notes.forEach(note => {
+  notes.forEach((note, index) => {
     const noteEl = document.createElement('div');
     noteEl.className = 'note-item';
     noteEl.dataset.priority = note.priority || 'white';
@@ -463,8 +501,16 @@ function renderNotesList() {
         <span class="note-time">${timeStr}</span>
         ${hasImages ? `<span class="note-images-count">🖼️</span>` : ''}
       </div>
+      <div class="note-actions">
+        <button class="move-note-btn move-up" data-id="${note.id}" title="${t('moveUp')}">⬆️</button>
+        <button class="move-note-btn move-date" data-id="${note.id}" title="${t('moveToDate')}">🔁</button>
+        <button class="move-note-btn move-down" data-id="${note.id}" title="${t('moveDown')}">⬇️</button>
+      </div>
     `;
 
+    noteEl.querySelector('.move-up').addEventListener('click', (e) => { e.stopPropagation(); moveNoteUp(note.id); });
+    noteEl.querySelector('.move-date').addEventListener('click', (e) => { e.stopPropagation(); showDatePickerModal(note.id); });
+    noteEl.querySelector('.move-down').addEventListener('click', (e) => { e.stopPropagation(); moveNoteDown(note.id); });
     noteEl.addEventListener('click', () => openNoteModal(note.id, true));
     notesList.appendChild(noteEl);
   });
@@ -751,6 +797,126 @@ function deleteNote() {
     closeNoteModal();
     showNotification(t('noteDeleted'));
     logger.info('Note deleted', { date: dateKey, noteId: editingNoteId });
+  });
+}
+
+let datePickerNoteId = null;
+let datePickerModal = null;
+
+function showDatePickerModal(noteId) {
+  datePickerNoteId = noteId;
+  if (!datePickerModal) {
+    datePickerModal = document.createElement('div');
+    datePickerModal.className = 'modal date-picker-modal';
+    datePickerModal.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="datePickerTitle">${t('selectDate')}</h3>
+          <button id="closeDatePickerBtn" class="icon-button small">×</button>
+        </div>
+        <div class="modal-body">
+          <input type="date" id="datePickerInput">
+        </div>
+        <div class="modal-footer">
+          <button id="cancelDatePickerBtn" class="secondary-btn">${t('cancelDate')}</button>
+          <button id="confirmDatePickerBtn" class="primary-btn">${t('save')}</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(datePickerModal);
+    
+    datePickerModal.querySelector('#closeDatePickerBtn').addEventListener('click', closeDatePicker);
+    datePickerModal.querySelector('#cancelDatePickerBtn').addEventListener('click', closeDatePicker);
+    datePickerModal.querySelector('#confirmDatePickerBtn').addEventListener('click', () => moveNoteToDate(datePickerModal.querySelector('#datePickerInput').value));
+  }
+  
+  datePickerModal.querySelector('#datePickerTitle').textContent = t('selectDate');
+  datePickerModal.querySelector('#cancelDatePickerBtn').textContent = t('cancelDate');
+  datePickerModal.querySelector('#confirmDatePickerBtn').textContent = t('save');
+  datePickerModal.classList.add('active');
+  const today = new Date().toISOString().split('T')[0];
+  datePickerModal.querySelector('#datePickerInput').value = today;
+  datePickerModal.querySelector('#datePickerInput').min = '2020-01-01';
+  datePickerModal.querySelector('#datePickerInput').max = '2030-12-31';
+}
+
+function closeDatePicker() {
+  if (datePickerModal) {
+    datePickerModal.classList.remove('active');
+    datePickerNoteId = null;
+  }
+}
+
+function moveNoteToDate(newDateKey) {
+  if (!datePickerNoteId || !newDateKey) return;
+  
+  const oldDateKey = formatDate(selectedDate);
+  const oldNotesData = currentNotes[oldDateKey];
+  const noteIndex = oldNotesData.notes.findIndex(n => n.id === datePickerNoteId);
+  
+  if (noteIndex === -1) return;
+  
+  const note = oldNotesData.notes.splice(noteIndex, 1)[0];
+  
+  if (!currentNotes[newDateKey]) {
+    currentNotes[newDateKey] = { notes: [], priority: 'white' };
+  }
+  
+  note.created = new Date().toISOString();
+  note.modified = new Date().toISOString();
+  currentNotes[newDateKey].notes.push(note);
+  
+  chrome.storage.local.set({
+    [oldDateKey]: oldNotesData,
+    [newDateKey]: currentNotes[newDateKey]
+  }, () => {
+    renderNotesList();
+    updateCalendar();
+    closeDatePicker();
+    showNotification(t('noteMoved'));
+    logger.info('Note moved to date', { noteId: datePickerNoteId, fromDate: oldDateKey, toDate: newDateKey });
+  });
+}
+
+function moveNoteUp(noteId) {
+  const dateKey = formatDate(selectedDate);
+  const notesData = currentNotes[dateKey];
+  const noteIndex = notesData.notes.findIndex(n => n.id === noteId);
+  
+  if (noteIndex <= 0) {
+    showNotification(t('cannotMoveUp'), 'error');
+    return;
+  }
+  
+  const note = notesData.notes.splice(noteIndex, 1)[0];
+  notesData.notes.splice(noteIndex - 1, 0, note);
+  
+  chrome.storage.local.set({ [dateKey]: notesData }, () => {
+    currentNotes[dateKey] = notesData;
+    renderNotesList();
+    showNotification(t('noteMovedUp'));
+    logger.info('Note moved up', { date: dateKey, noteId });
+  });
+}
+
+function moveNoteDown(noteId) {
+  const dateKey = formatDate(selectedDate);
+  const notesData = currentNotes[dateKey];
+  const noteIndex = notesData.notes.findIndex(n => n.id === noteId);
+  
+  if (noteIndex === -1 || noteIndex >= notesData.notes.length - 1) {
+    showNotification(t('cannotMoveDown'), 'error');
+    return;
+  }
+  
+  const note = notesData.notes.splice(noteIndex, 1)[0];
+  notesData.notes.splice(noteIndex + 1, 0, note);
+  
+  chrome.storage.local.set({ [dateKey]: notesData }, () => {
+    currentNotes[dateKey] = notesData;
+    renderNotesList();
+    showNotification(t('noteMovedDown'));
+    logger.info('Note moved down', { date: dateKey, noteId });
   });
 }
 

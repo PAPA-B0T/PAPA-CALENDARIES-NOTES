@@ -647,6 +647,37 @@ button {
   border-color: var(--highlight);
 }
 
+.note-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.move-note-btn {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background-color: var(--button-secondary);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.move-note-btn:hover {
+  background-color: var(--highlight);
+  color: #fff;
+  border-color: var(--highlight);
+}
+
+.move-note-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .note-title {
   font-weight: 600;
   font-size: 14px;
@@ -1331,4 +1362,23 @@ button {
   position: absolute;
   left: 0;
   color: var(--highlight);
+}
+
+.date-picker-modal .modal-body {
+  padding: 16px;
+}
+
+#datePickerInput {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--background);
+  color: var(--text);
+}
+
+#datePickerInput:focus {
+  outline: none;
+  border-color: var(--highlight);
 }
