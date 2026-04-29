@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><title>Request</title></head>
+<body>
+<script>
+const params = new URLSearchParams(location.search);
+const url = params.get('url');
+const method = params.get('method') || 'GET';
+const body = params.get('body');
+
+const options = {
+  method: method,
+  headers: { 'Content-Type': 'application/json' }
+};
+
+if (body) options.body = body;
+
+fetch(url, options)
+  .then(r => r.text())
+  .then(text => {
+    document.body.textContent = JSON.stringify({ success: true, text: text });
+  })
+  .catch(err => {
+    document.body.textContent = JSON.stringify({ success: false, error: err.message });
+  });
+</script>
+</body>
+</html>

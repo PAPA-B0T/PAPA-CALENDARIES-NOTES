@@ -26,11 +26,16 @@ class Logger {
       });
     });
 
-    const consoleMsg = `[${type.toUpperCase()}] ${message}`;
-    if (data) {
-      console[LogLevel[type] === 'error' ? 'error' : 'log'](consoleMsg, data);
-    } else {
-      console[LogLevel[type] === 'error' ? 'error' : 'log'](consoleMsg);
+    const consoleMsg = `[${String(type).toUpperCase()}] ${message}`;
+    const writer = console.log;
+    try {
+      if (data) {
+        writer.call(console, consoleMsg, data);
+      } else {
+        writer.call(console, consoleMsg);
+      }
+    } catch (error) {
+      console.log(consoleMsg);
     }
   }
 

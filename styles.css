@@ -951,6 +951,32 @@ button {
   padding: 16px;
 }
 
+#reminderModal .form-group {
+  margin-bottom: 12px;
+}
+
+#reminderModal .form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+#reminderModal .input-field {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+#reminderModal .input-field:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
 .note-title-input {
   width: 100%;
   padding: 10px 12px;
@@ -1973,4 +1999,81 @@ button {
 
 #settingsModal .webhook-btn.delete-btn:hover {
   background-color: #c0392b;
+}
+
+.reminders-modal {
+  max-width: 430px;
+}
+
+.saved-reminders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.saved-reminder-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+}
+
+.saved-reminder-title {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.saved-reminder-meta {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.reminder-repeat-options {
+  display: block;
+}
+
+.reminder-repeat-options.hidden,
+.reminder-weekday-options.hidden {
+  display: none;
+}
+
+.reminder-interval-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.weekday-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.weekday-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.delete-reminder-btn {
+  border: none;
+  border-radius: 6px;
+  background: #e74c3c;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 7px 10px;
+}
+
+.delete-reminder-btn:hover {
+  background: #c0392b;
 }

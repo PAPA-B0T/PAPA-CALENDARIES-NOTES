@@ -30,6 +30,22 @@
 - Task/subtask completion with timestamp (dd.mm.yy-hh:mm:ss).
 - Tasks auto-complete when all subtasks are done.
 - Edit/Delete task buttons with EN/RU tooltips.
+- Telegram reminder button for notes and tasks.
+
+### Telegram Reminders
+- Settings for Worker URL, bot token, chat ID, and notification toggle.
+- Worker URL is normalized automatically, so the protocol can be omitted.
+- Test notification sends a direct POST request to the configured Worker without creating a queued reminder.
+- Test notification verifies the exact Worker reminder key and reports Telegram delivery errors.
+- Worker reports missing `BOT_TOKEN` secret and Telegram API errors during tests.
+- Created reminders are stored locally and shown in Settings.
+- Reminders can be deleted from the Settings list and removed from the Worker queue.
+- Telegram reminder messages include note content and task subtasks with completion status.
+- Note reminders send up to 10 inline note images to Telegram.
+- Reminders support one-time repeated sends, daily, weekly, monthly, and selected-weekday schedules.
+- Cloudflare Worker integration with `/add-reminder`, `/delete-reminder`, `/send-test`, `/check`, `/webhook`, and Cloudflare Cron Triggers.
+- Setup helpers in `setup/` deploy the Worker, configure KV, upload `BOT_TOKEN`, and enable the schedule without cron-job.org.
+- Reminder management opens from the main toolbar bell button.
 
 ### 🖼 Images
 - Insert images from clipboard.
@@ -126,3 +142,10 @@ For convenient note-taking 🧘‍♂️💻
 USDT (TRC20): `TFtKizr6WwHccsLSJCYuYAsLbiLyCGj17p`
 
 ![Donation QR](doc/TRC20%20-%20USDT.png)
+
+### Additional Project Files
+- `background.js` - background fetch bridge.
+- `request.html` - request helper page.
+- `workers/` - Cloudflare Worker code for Telegram reminders.
+- `tests/reminder-regression.test.js` - reminder regression checks.
+- `setup/` - Cloudflare-only reminder setup scripts and Russian setup guide.

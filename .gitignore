@@ -1,4 +1,5 @@
 .env
+setup/setup.env
 backups/
 nppBackup/
 .git/

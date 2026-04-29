@@ -21,6 +21,9 @@ const closeDonationBtn = document.getElementById('closeDonationBtn');
 const exportButton = document.getElementById('exportButton');
 const importButton = document.getElementById('importButton');
 const importInput = document.getElementById('importInput');
+const remindersButton = document.getElementById('remindersButton');
+const remindersModal = document.getElementById('remindersModal');
+const closeRemindersBtn = document.getElementById('closeRemindersBtn');
 const infoButton = document.getElementById('infoButton');
 const infoModal = document.getElementById('infoModal');
 const closeInfoBtn = document.getElementById('closeInfoBtn');
@@ -46,9 +49,128 @@ let currentTaskSubtasks = [];
 let currentTaskPriority = 'white';
 let currentTaskTitleColor = 'default';
 
-const APP_VERSION = '1.1.2';
+const APP_VERSION = '1.4.1';
 const VERSION_HISTORY = {
   en: [
+    {
+      version: '1.4.1',
+      date: '2026-04-29',
+      features: [
+        'Note reminder images are sent to Telegram, up to 10 images per reminder',
+        'Worker deployment is required for recurring reminder rescheduling'
+      ]
+    },
+    {
+      version: '1.4.0',
+      date: '2026-04-29',
+      features: [
+        'Added recurring Telegram reminders: daily, weekly, monthly, selected weekdays, and repeated one-time reminders'
+      ]
+    },
+    {
+      version: '1.3.4',
+      date: '2026-04-29',
+      features: [
+        'Reminder setup instructions now explain webhook confirmation and test notification checks'
+      ]
+    },
+    {
+      version: '1.3.3',
+      date: '2026-04-29',
+      features: [
+        'Setup instructions now explain how to open PowerShell in the setup folder',
+        'Setup script prints the real Worker URL after deployment'
+      ]
+    },
+    {
+      version: '1.3.2',
+      date: '2026-04-29',
+      features: [
+        'Reminder Telegram messages now include note content and task subtasks with completion status',
+        'Setup script validates Cloudflare Account ID before running Wrangler',
+        'Setup instructions clarify that Account ID is a 32-character Cloudflare ID, not an email or Telegram Chat ID'
+      ]
+    },
+    {
+      version: '1.3.1',
+      date: '2026-04-29',
+      features: [
+        'Moved reminder management to a dedicated bell button in the main toolbar',
+        'Simplified reminder icons to a single bell',
+        'Improved setup script retry diagnostics and clarified Cloudflare Account ID versus Telegram Chat ID'
+      ]
+    },
+    {
+      version: '1.3.0',
+      date: '2026-04-29',
+      features: [
+        'Removed cron-job.org from Telegram reminder setup',
+        'Added Cloudflare Cron Trigger support for automatic reminder checks',
+        'Added setup files for one-command Cloudflare Worker deployment',
+        'Expanded settings instructions for Cloudflare API token, Worker URL, and Chat ID'
+      ]
+    },
+    {
+      version: '1.2.6',
+      date: '2026-04-29',
+      features: [
+        'Worker URL is normalized automatically for Telegram reminders',
+        'Telegram reminder dialogs and settings are localized through the shared translation system',
+        'Fetch failures now show a clearer Worker URL/network message'
+      ]
+    },
+    {
+      version: '1.2.5',
+      date: '2026-04-29',
+      features: [
+        'Test notification now sends directly through the Worker without creating a KV reminder',
+        'Avoided Cloudflare KV list delay during immediate Telegram tests'
+      ]
+    },
+    {
+      version: '1.2.4',
+      date: '2026-04-29',
+      features: [
+        'Telegram test notification now reports the exact Worker or Telegram API failure reason',
+        'Logger no longer prints app-level errors with console.error during expected test failures',
+        'Worker detects missing BOT_TOKEN secret explicitly'
+      ]
+    },
+    {
+      version: '1.2.3',
+      date: '2026-04-29',
+      features: [
+        'Improved Telegram test notification diagnostics',
+        'Test reminders are removed from the Worker queue if Telegram delivery fails',
+        'Logger console output is now defensive and no longer masks the real reminder error'
+      ]
+    },
+    {
+      version: '1.2.2',
+      date: '2026-04-29',
+      features: [
+        'Fixed Telegram reminder buttons opening the note instead of the reminder dialog',
+        'Fixed reminder test and save requests to send POST JSON to the Worker',
+        'Added saved reminders list with delete management',
+        'Added Worker endpoint for deleting scheduled reminders'
+      ]
+    },
+    {
+      version: '1.2.1',
+      date: '2026-04-28',
+      features: [
+        'Added host permissions for Telegram API and Workers in manifest.json'
+      ]
+    },
+    {
+      version: '1.2.0',
+      date: '2026-04-27',
+      features: [
+        'Fixed: Test notification and Set connection buttons now work',
+        'Added Delete connection button for webhook',
+        'Added error handling and logging for Telegram notifications'
+      ]
+    },
     {
       version: '1.1.1',
       date: '2026-04-27',
@@ -189,7 +311,126 @@ const VERSION_HISTORY = {
       ]
     }
   ],
-ru: [
+  ru: [
+    {
+      version: '1.4.1',
+      date: '2026-04-29',
+      features: [
+        'Картинки из заметок отправляются в Telegram-напоминаниях, до 10 картинок на напоминание',
+        'Для повторяющихся напоминаний требуется деплой обновленного Worker'
+      ]
+    },
+    {
+      version: '1.4.0',
+      date: '2026-04-29',
+      features: [
+        'Добавлена периодичность Telegram-напоминаний: ежедневно, еженедельно, ежемесячно, по дням недели и разово несколько раз'
+      ]
+    },
+    {
+      version: '1.3.4',
+      date: '2026-04-29',
+      features: [
+        'Инструкция настройки напоминаний теперь объясняет проверку webhook и тестового уведомления'
+      ]
+    },
+    {
+      version: '1.3.3',
+      date: '2026-04-29',
+      features: [
+        'Инструкция настройки теперь подробно объясняет, как открыть PowerShell в папке setup',
+        'Setup-скрипт печатает реальный Worker URL после деплоя'
+      ]
+    },
+    {
+      version: '1.3.2',
+      date: '2026-04-29',
+      features: [
+        'Telegram-сообщения напоминаний теперь включают текст заметки и подзадачи со статусом выполнения',
+        'Setup-скрипт проверяет Cloudflare Account ID до запуска Wrangler',
+        'Инструкция уточняет, что Account ID - это 32-символьный Cloudflare ID, а не email и не Telegram Chat ID'
+      ]
+    },
+    {
+      version: '1.3.1',
+      date: '2026-04-29',
+      features: [
+        'Управление напоминаниями вынесено в отдельную кнопку-колокольчик на главной панели',
+        'Иконки напоминаний упрощены до одного колокольчика',
+        'Улучшены повторы setup-скрипта и пояснение разницы между Cloudflare Account ID и Telegram Chat ID'
+      ]
+    },
+    {
+      version: '1.3.0',
+      date: '2026-04-29',
+      features: [
+        'cron-job.org удален из настройки Telegram-напоминаний',
+        'Добавлена поддержка Cloudflare Cron Trigger для автоматической проверки напоминаний',
+        'Добавлены setup-файлы для деплоя Cloudflare Worker одной командой',
+        'Расширены инструкции в настройках для Cloudflare API token, Worker URL и Chat ID'
+      ]
+    },
+    {
+      version: '1.2.6',
+      date: '2026-04-29',
+      features: [
+        'URL Worker автоматически нормализуется для Telegram-напоминаний',
+        'Окна и настройки Telegram-напоминаний локализованы через общую систему переводов',
+        'Ошибки fetch теперь показывают более понятное сообщение про URL Worker или сеть'
+      ]
+    },
+    {
+      version: '1.2.5',
+      date: '2026-04-29',
+      features: [
+        'Тест уведомления теперь отправляется напрямую через Worker без создания KV-напоминания',
+        'Устранена задержка Cloudflare KV list при мгновенной проверке Telegram'
+      ]
+    },
+    {
+      version: '1.2.4',
+      date: '2026-04-29',
+      features: [
+        'Тест Telegram-уведомления теперь показывает точную причину ошибки Worker или Telegram API',
+        'Логгер больше не выводит ожидаемые ошибки теста через console.error',
+        'Worker явно определяет отсутствие секрета BOT_TOKEN'
+      ]
+    },
+    {
+      version: '1.2.3',
+      date: '2026-04-29',
+      features: [
+        'Улучшена диагностика тестового Telegram-уведомления',
+        'Тестовые напоминания удаляются из очереди Worker, если отправка в Telegram не прошла',
+        'Вывод логгера в консоль стал устойчивым и больше не маскирует настоящую ошибку напоминаний'
+      ]
+    },
+    {
+      version: '1.2.2',
+      date: '2026-04-29',
+      features: [
+        'Исправлены кнопки Telegram-напоминаний: теперь открывается окно напоминания, а не заметка',
+        'Исправлены тест и сохранение напоминаний: теперь отправляется POST JSON в Worker',
+        'Добавлен список созданных напоминаний с удалением',
+        'Добавлен endpoint Worker для удаления запланированных напоминаний'
+      ]
+    },
+    {
+      version: '1.2.1',
+      date: '2026-04-28',
+      features: [
+        'Добавлены права доступа для Telegram API и Workers в manifest.json'
+      ]
+    },
+    {
+      version: '1.2.0',
+      date: '2026-04-27',
+      features: [
+        'Исправлено: кнопки "Тест уведомления" и "Установить связь" теперь работают',
+        'Добавлена кнопка "Удалить связь" для webhook',
+        'Добавлена обработка ошибок и логирование для Telegram уведомлений'
+      ]
+    },
     {
       version: '1.1.1',
       date: '2026-04-27',
@@ -394,6 +635,7 @@ const translations = {
     donationTitle: 'Donation for development',
     titleExport: 'Export',
     titleImport: 'Import',
+    titleReminders: 'Reminders',
     titleInfo: 'About',
     titleSettings: 'Settings',
     aboutTitle: 'About Extension ' + APP_VERSION,
@@ -413,9 +655,17 @@ const translations = {
     cannotMoveDown: 'Cannot move down',
     cancelDate: 'Cancel',
     reminderTitle: 'Set Reminder',
+    reminderMessageLabel: 'Message',
     reminderTime: 'Reminder time',
     reminderDate: 'Reminder date',
-    reminderRepeat: 'Repeat after',
+    reminderRepeat: 'Repeat',
+    reminderRepeatTypeLabel: 'Periodicity',
+    reminderRepeatOnce: 'Once',
+    reminderRepeatCountLabel: 'Number of times',
+    reminderRepeatIntervalLabel: 'Interval',
+    reminderRepeatIntervalUnitLabel: 'Unit',
+    reminderWeekdays: 'Selected weekdays',
+    reminderWeekdayLabel: 'Days of week',
     reminderNone: 'No repeat',
     reminderDaily: 'Daily',
     reminderWeekly: 'Weekly',
@@ -427,16 +677,33 @@ const translations = {
     deleteReminder: 'Delete reminder',
     reminderSaved: 'Reminder saved',
     reminderDeleted: 'Reminder deleted',
+    reminderTypeNote: 'Note',
+    reminderTypeTask: 'Task',
+    reminderRepeatEvery: 'Repeats',
+    weekdayMon: 'Mon',
+    weekdayTue: 'Tue',
+    weekdayWed: 'Wed',
+    weekdayThu: 'Thu',
+    weekdayFri: 'Fri',
+    weekdaySat: 'Sat',
+    weekdaySun: 'Sun',
+    fillAllFields: 'Please fill all fields',
+    configureTelegram: 'Configure Telegram in settings',
+    workerFetchFailed: 'Could not reach Worker. Check Worker URL and internet access.',
+    testNotificationSent: 'Test notification sent',
+    reminderTooManyImages: 'A reminder can include up to 10 images',
+    reminderImageTooLarge: 'One of the images is too large for Telegram reminder',
+    reminderImagesTooLarge: 'Reminder images are too large to store in Cloudflare KV',
     telegramNotifications: 'Telegram Notifications',
-    telegramSetupInfo: 'Follow these steps to enable notifications:',
-    step1Title: 'Step 1: Create Telegram Bot',
-    step1Desc: '1. Open <a href="https://t.me/BotFather" target="_blank">@BotFather</a> in Telegram\n2. Send /newbot\n3. Enter name and username\n4. Copy bot token',
+    telegramSetupInfo: 'Cloudflare runs reminder checks automatically. Follow the steps below once, then paste Worker URL and Chat ID here.',
+    step1Title: 'Step 1: Create Telegram bot',
+    step1Desc: '1. Open <a href="https://t.me/BotFather" target="_blank">@BotFather</a> in Telegram<br>2. Click Start and send /newbot<br>3. Enter bot name and username ending with bot<br>4. Copy the token from BotFather - this is TELEGRAM_BOT_TOKEN<br>&nbsp;&nbsp;* Paste TELEGRAM_BOT_TOKEN below in "Bot Token: ..."<br>5. Open your new bot and send /start',
     step2Title: 'Step 2: Get Chat ID',
-    step2Desc: '1. Open <a href="https://t.me/userinfobot" target="_blank">@userinfobot</a> bot\n2. Click Start\n3. Bot will show your Chat ID (number)',
-    step3Title: 'Step 3: Deploy Worker',
-    step3Desc: '1. Go to <a href="https://dash.cloudflare.com/" target="_blank">cloudflare.com</a> → Workers\n2. Create new worker, <a href="https://github.com/PAPA-B0T/PAPA-CALENDARIES-NOTES/blob/main/workers/reminder-worker.js" target="_blank">paste this code</a>\n3. Go to Settings → Variables\n4. Add BOT_TOKEN variable with your bot token\n5. Go to KV → Create namespace "REMINDERS"\n6. In Worker Settings → Add KV Namespace Binding: name="REMINDERS", namespace=REMINDERS',
-    step4Title: 'Step 4: Setup Cron',
-    step4Desc: '1. Go to <a href="https://cron-job.org" target="_blank">cron-job.org</a>\n2. Create job: URL = your worker URL + /check (e.g., https://my-worker.workers.dev/check)\n3. Schedule: Every minute',
+    step2Desc: '1. Open <a href="https://t.me/fetch_id_bot" target="_blank">@fetch_id_bot</a><br>2. Click Start<br>3. Copy the number/value shown by the bot - this is your Chat ID<br>&nbsp;&nbsp;* Paste Chat ID below in "Chat ID: ..."',
+    step3Title: 'Step 3: Create Cloudflare API Token',
+    step3Desc: '1. If you do not have a Cloudflare account, open <a href="https://dash.cloudflare.com/sign-up" target="_blank">Cloudflare Sign Up</a> and create one<br>2. Open <a href="https://dash.cloudflare.com/" target="_blank">Cloudflare Dashboard</a> and click Account home on the left<br>3. Look at the browser address bar. It will look like https://dash.cloudflare.com/ACCOUNT_ID/home/overview<br>4. Copy the part between dash.cloudflare.com/ and /home/overview. This is CLOUDFLARE_ACCOUNT_ID: a 32-character ID, not your email and not Telegram Chat ID<br>5. Open <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank">Cloudflare API Tokens</a><br>6. Click Create Token<br>7. Choose Custom token -> Get started<br>8. Token name: PAPA Calendaries Notes Setup<br>9. Add 3 Permissions for API:<br>&nbsp;&nbsp;* Account -> Workers Scripts -> Edit<br>&nbsp;&nbsp;* Account -> Workers KV Storage -> Edit<br>&nbsp;&nbsp;* User -> Memberships -> Read<br>10. In Account Resources select:<br>&nbsp;&nbsp;* Include -> Specific account -> your account (or All accounts)<br>11. Click Continue to summary -> Create Token<br>12. Copy the token once - this is CLOUDFLARE_API_TOKEN',
+    step4Title: 'Step 4: Run setup script',
+    step4Desc: '1. Open the "setup.env.example" file in the "**:\\**\\PAPA CALENDARIES NOTES\\setup\\" folder and save a copy of this file as "setup.env" in the same "**:\\**\\PAPA CALENDARIES NOTES\\setup\\" folder<br>2. Fill all received values in "setup.env":<br>&nbsp;&nbsp;&nbsp;&nbsp;CLOUDFLARE_API_TOKEN= ...<br>&nbsp;&nbsp;&nbsp;&nbsp;CLOUDFLARE_ACCOUNT_ID= ...<br>&nbsp;&nbsp;&nbsp;&nbsp;TELEGRAM_BOT_TOKEN= ...<br>&nbsp;&nbsp;&nbsp;&nbsp;WORKER_NAME= (leave as is, or write your own)<br>3. Go to the extension setup folder:<br>&nbsp;&nbsp;* Open PowerShell: press Win + R, type cmd, click OK<br>&nbsp;&nbsp;* Find the setup folder inside the extension files, for example C:\\PROJECT\\PAPA CALENDARIES NOTES\\setup<br>&nbsp;&nbsp;* Enter the folder with this command:<br>&nbsp;&nbsp;&nbsp;&nbsp;cd "C:\\PROJECT\\PAPA CALENDARIES NOTES\\setup"<br>4. Enter the command:<br>&nbsp;&nbsp;&nbsp;&nbsp;powershell -ExecutionPolicy Bypass -File .\\setup-reminders.ps1<br>5. Wait for setup to finish and copy the Worker URL printed by Wrangler<br>6. Paste Worker URL and Chat ID below, click Save<br>&nbsp;&nbsp;* Then click Set connection. A page should open with this text: {"ok":true,"result":true,"description":"Webhook was set"}. If it does not open, turn on VPN and click Set connection again. It is important that the page with this text opens: {"ok":true,"result":true,"description":"Webhook was set"}<br>&nbsp;&nbsp;* Then click Test notification. If the bot writes to you within 1-2 minutes, setup is successful.<br>PS: If the bot does not send a message, something was configured incorrectly. Review the setup steps and try again.',
     workerUrlLabel: 'Worker URL:',
     botTokenLabel: 'Bot Token:',
     chatIdLabel: 'Chat ID:',
@@ -504,6 +771,7 @@ const translations = {
     donationTitle: 'Пожертвование на развитие',
     titleExport: 'Экспорт',
     titleImport: 'Импорт',
+    titleReminders: 'Напоминания',
     titleInfo: 'О расширении',
     titleSettings: 'Настройки',
     aboutTitle: 'О расширении ' + APP_VERSION,
@@ -523,9 +791,17 @@ const translations = {
     cannotMoveDown: 'Нельзя переместить вниз',
     cancelDate: 'Отмена',
     reminderTitle: 'Установить напоминание',
+    reminderMessageLabel: 'Сообщение',
     reminderTime: 'Время напоминания',
     reminderDate: 'Дата напоминания',
     reminderRepeat: 'Повторять',
+    reminderRepeatTypeLabel: 'Периодичность',
+    reminderRepeatOnce: 'Разово',
+    reminderRepeatCountLabel: 'Количество раз',
+    reminderRepeatIntervalLabel: 'Интервал',
+    reminderRepeatIntervalUnitLabel: 'Единица',
+    reminderWeekdays: 'Каждый день недели',
+    reminderWeekdayLabel: 'Дни недели',
     reminderNone: 'Без повтора',
     reminderDaily: 'Каждый день',
     reminderWeekly: 'Каждую неделю',
@@ -537,16 +813,33 @@ const translations = {
     deleteReminder: 'Удалить напоминание',
     reminderSaved: 'Напоминание сохранено',
     reminderDeleted: 'Напоминание удалено',
+    reminderTypeNote: 'Заметка',
+    reminderTypeTask: 'Задача',
+    reminderRepeatEvery: 'Повтор',
+    weekdayMon: 'Пн',
+    weekdayTue: 'Вт',
+    weekdayWed: 'Ср',
+    weekdayThu: 'Чт',
+    weekdayFri: 'Пт',
+    weekdaySat: 'Сб',
+    weekdaySun: 'Вс',
+    fillAllFields: 'Заполните все поля',
+    configureTelegram: 'Настройте Telegram в настройках',
+    workerFetchFailed: 'Не удалось подключиться к Worker. Проверьте URL Worker и интернет.',
+    testNotificationSent: 'Тестовое уведомление отправлено',
+    reminderTooManyImages: 'В одно напоминание можно добавить не более 10 картинок',
+    reminderImageTooLarge: 'Одна из картинок слишком большая для Telegram-напоминания',
+    reminderImagesTooLarge: 'Картинки напоминания слишком большие для хранения в Cloudflare KV',
     telegramNotifications: 'Telegram уведомления',
-    telegramSetupInfo: 'Следуйте этим шагам для включения уведомлений:',
-    step1Title: 'Шаг 1: Создание Telegram бота',
-    step1Desc: '1. Откройте <a href="https://t.me/BotFather" target="_blank">@BotFather</a> в Telegram\n2. Отправьте /newbot\n3. Введите имя и username\n4. Скопируйте токен бота',
-    step2Title: 'Шаг 2: Получение Chat ID',
-    step2Desc: '1. Откройте бота <a href="https://t.me/userinfobot" target="_blank">@userinfobot</a>\n2. Нажмите Start\n3. Бот покажет ваш Chat ID (число)',
-    step3Title: 'Шаг 3: Деплой Worker',
-    step3Desc: '1. Перейдите на <a href="https://dash.cloudflare.com/" target="_blank">cloudflare.com</a> → Workers\n2. Создайте новый worker, <a href="https://github.com/PAPA-B0T/PAPA-CALENDARIES-NOTES/blob/main/workers/reminder-worker.js" target="_blank">вставьте этот код</a>\n3. Перейдите в Settings → Variables\n4. Добавьте переменную BOT_TOKEN с токеном вашего бота\n5. Перейдите в KV → Создайте namespace "REMINDERS"\n6. В настройках Worker → Add KV Namespace Binding: name="REMINDERS", namespace=REMINDERS',
-    step4Title: 'Шаг 4: Настройка Cron',
-    step4Desc: '1. Перейдите на <a href="https://cron-job.org" target="_blank">cron-job.org</a>\n2. Создайте задачу: URL = ваш worker URL + /check (например: https://мой-worker.workers.dev/check)\n3. Расписание: Каждую минуту',
+    telegramSetupInfo: 'Cloudflare будет сам проверять напоминания каждую минуту. Один раз пройдите шаги ниже, затем вставьте Worker URL и Chat ID в поля настроек.',
+    step1Title: 'Шаг 1: Создайте Telegram-бота',
+    step1Desc: '1. Откройте <a href="https://t.me/BotFather" target="_blank">@BotFather</a> в Telegram<br>2. Нажмите Start и отправьте /newbot<br>3. Введите имя бота и username, который заканчивается на bot<br>4. Скопируйте токен от BotFather - это TELEGRAM_BOT_TOKEN<br>&nbsp;&nbsp;* вставьте TELEGRAM_BOT_TOKEN ниже в настройках в "Токен бота: ..."<br>5. Откройте своего нового бота и отправьте /start',
+    step2Title: 'Шаг 2: Получите Chat ID',
+    step2Desc: '1. Откройте <a href="https://t.me/fetch_id_bot" target="_blank">@fetch_id_bot</a><br>2. Нажмите Start<br>3. Скопируйте число (значение), которое покажет бот - это ваш Chat ID<br>&nbsp;&nbsp;* вставьте значение Chat ID ниже в настройках в "Chat ID: ..."',
+    step3Title: 'Шаг 3: Создайте Cloudflare API Token',
+    step3Desc: '1. Если у вас нет аккаунта Cloudflare, откройте <a href="https://dash.cloudflare.com/sign-up" target="_blank">Cloudflare Sign Up</a> и зарегистрируйтесь<br>2. Откройте <a href="https://dash.cloudflare.com/" target="_blank">Cloudflare Dashboard</a> и нажмите слева Account home<br>3. Посмотрите на адресную строку браузера. Адрес будет похож на https://dash.cloudflare.com/ACCOUNT_ID/home/overview<br>4. Скопируйте часть между dash.cloudflare.com/ и /home/overview. Это CLOUDFLARE_ACCOUNT_ID: 32-символьный ID, не email и не Telegram Chat ID<br>5. Откройте <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank">Cloudflare API Tokens</a><br>6. Нажмите Create Token<br>7. Выберите Custom token -> Get started<br>8. Token name: PAPA Calendaries Notes Setup<br>9. Добавьте "Permissions" 3 разрешения для API:<br>&nbsp;&nbsp;* Account -> Workers Scripts -> Edit<br>&nbsp;&nbsp;* Account -> Workers KV Storage -> Edit<br>&nbsp;&nbsp;* User -> Memberships -> Read<br>10. В "Account Resources" выберите:<br>&nbsp;&nbsp;* Include -> Specific account -> ваш аккаунт (или "All accounts")<br>11. Нажмите Continue to summary -> Create Token<br>12. Скопируйте токен сразу - это CLOUDFLARE_API_TOKEN',
+    step4Title: 'Шаг 4: Запустите setup-скрипт',
+    step4Desc: '1. Откройте файл "setup.env.example" в папке "**:\\**\\PAPA CALENDARIES NOTES\\setup\\" и сохраните копию этого файла как "setup.env" в этой же папке "**:\\**\\PAPA CALENDARIES NOTES\\setup\\"<br>2. Заполните в файле "setup.env" все полученные данные:<br>&nbsp;&nbsp;&nbsp;&nbsp;CLOUDFLARE_API_TOKEN= ...<br>&nbsp;&nbsp;&nbsp;&nbsp;CLOUDFLARE_ACCOUNT_ID= ...<br>&nbsp;&nbsp;&nbsp;&nbsp;TELEGRAM_BOT_TOKEN= ...<br>&nbsp;&nbsp;&nbsp;&nbsp;WORKER_NAME= (оставьте как есть, или напишите своё)<br>3. Зайдите в директорию setup расширения, для этого:<br>&nbsp;&nbsp;* Откройте PowerShell: нажмите Win + R, введите cmd, нажмите OK<br>&nbsp;&nbsp;* Узнайте директорию расположения папки setup, которая находится в файлах папки с расширением, например C:\\PROJECT\\PAPA CALENDARIES NOTES\\setup<br>&nbsp;&nbsp;* Зайдите в директорию командой:<br>&nbsp;&nbsp;&nbsp;&nbsp;cd "C:\\PROJECT\\PAPA CALENDARIES NOTES\\setup"<br>4. Введите команду:<br>&nbsp;&nbsp;&nbsp;&nbsp;powershell -ExecutionPolicy Bypass -File .\\setup-reminders.ps1<br>5. Подождите окончания настройки и скопируйте Worker URL, который напечатает Wrangler<br>6. Вставьте Worker URL и Chat ID ниже, нажмите "Сохранить"<br>&nbsp;&nbsp;* затем "Установить связь" - должна открыться страница с текстом: {"ok":true,"result":true,"description":"Webhook was set"} - если не открылась, включите ВПН и попробуйте снова нажать на "Установить связь" - важно чтобы открылась страница с: {"ok":true,"result":true,"description":"Webhook was set"}<br>&nbsp;&nbsp;* затем нажмите "Тест уведомления" - если вам бот напишет в течение 1-2 минут, то вы успешно все настроили - Поздравляю!<br>PS: а если бот не прислал сообщение, то вы что-то сделали не так, и попробуйте снова просмотреть весь алгоритм настройки...',
     workerUrlLabel: 'URL Worker:',
     botTokenLabel: 'Токен бота:',
     chatIdLabel: 'Chat ID:',
@@ -585,10 +878,23 @@ function t(key) {
   return translations[currentLang][key] || translations.en[key] || key;
 }
 
+function applyI18n(root = document) {
+  root.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (key && t(key)) el.innerHTML = t(key);
+  });
+
+  root.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (key && t(key)) el.placeholder = t(key);
+  });
+}
+
 function setLanguage(lang) {
   currentLang = lang;
   document.getElementById('langEN').classList.toggle('active', lang === 'en');
   document.getElementById('langRU').classList.toggle('active', lang === 'ru');
+  applyI18n(document);
 
   document.querySelector('h1').textContent = t('appTitle');
   document.title = t('appTitle');
@@ -607,6 +913,7 @@ function setLanguage(lang) {
   document.getElementById('donationButton').title = t('titleDonation');
   document.getElementById('exportButton').title = t('titleExport');
   document.getElementById('importButton').title = t('titleImport');
+  if (remindersButton) remindersButton.title = t('titleReminders');
   document.getElementById('infoButton').title = t('titleInfo');
   const settingsBtn = document.getElementById('settingsButton');
   if (settingsBtn) settingsBtn.title = t('titleSettings');
@@ -808,7 +1115,7 @@ function renderNotesList() {
         ${hasImages ? `<span class="note-images-count">🖼️</span>` : ''}
       </div>
       <div class="note-actions">
-        <button class="reminder-note-btn" data-id="${note.id}" title="${t('setReminder')}">🔔📱</button>
+        <button class="reminder-note-btn" data-id="${note.id}" title="${t('setReminder')}">🔔</button>
         <button class="move-note-btn move-up" data-id="${note.id}" title="${t('moveUp')}">⬆️</button>
         <button class="move-note-btn move-date" data-id="${note.id}" title="${t('moveToDate')}">🔁</button>
         <button class="move-note-btn move-down" data-id="${note.id}" title="${t('moveDown')}">⬇️</button>
@@ -1124,7 +1431,7 @@ function renderTasksList() {
       </div>
       <div class="task-subtasks">${subtasksHtml}</div>
       <div class="task-actions">
-        <button class="reminder-task-btn" data-id="${task.id}" title="${t('setReminder')}">🔔📱</button>
+        <button class="reminder-task-btn" data-id="${task.id}" title="${t('setReminder')}">🔔</button>
         <button class="edit-task-btn" data-id="${task.id}" title="${t('editTooltip')}">✏️</button>
         <button class="delete-task-btn" data-id="${task.id}" title="${t('deleteTooltip')}">🗑️</button>
       </div>
@@ -1964,6 +2271,24 @@ function setupEventListeners() {
     importInput.click();
   });
 
+  if (remindersButton) {
+    remindersButton.addEventListener('click', () => {
+      applyI18n(remindersModal);
+      renderSavedReminders();
+      remindersModal.classList.add('active');
+    });
+  }
+
+  if (closeRemindersBtn) {
+    closeRemindersBtn.addEventListener('click', () => remindersModal.classList.remove('active'));
+  }
+
+  if (remindersModal) {
+    remindersModal.addEventListener('click', (e) => {
+      if (e.target === remindersModal) remindersModal.classList.remove('active');
+    });
+  }
+
   importInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -2082,26 +2407,93 @@ function setupEventListeners() {
     saveSettingsBtn.addEventListener('click', saveSettings);
   }
 
+  const testTelegramBtn = document.getElementById('testTelegramBtn');
+  if (testTelegramBtn) {
+    testTelegramBtn.addEventListener('click', async () => {
+      const workerUrl = document.getElementById('workerUrlInput').value.trim();
+      const chatId = document.getElementById('chatIdInput').value.trim();
+
+      if (!workerUrl || !chatId) {
+        showNotification(t('fillAllFields'), 'error');
+        return;
+      }
+
+      try {
+        await sendReminderRequest(workerUrl, '/send-test', {
+          chat_id: chatId,
+          message: currentLang === 'ru' ? '🔔 Тестовая проверка! Напоминания работают!' : '🔔 Test check! Reminders are working!'
+        });
+        showNotification(t('testNotificationSent'), 'success');
+      } catch (error) {
+        logger.warn('Test reminder failed', { error: error.message });
+        showNotification(error.message, 'error');
+      }
+    });
+  }
+
+  const setWebhookBtn = document.getElementById('setWebhookBtn');
+  if (setWebhookBtn) {
+    setWebhookBtn.addEventListener('click', () => {
+      const workerUrl = document.getElementById('workerUrlInput').value.trim();
+      const botToken = document.getElementById('botTokenInput').value.trim();
+
+      if (!workerUrl || !botToken) {
+        showNotification(currentLang === 'ru' ? 'Заполните URL Worker и токен бота' : 'Fill Worker URL and bot token', 'error');
+        return;
+      }
+
+      const webhookUrl = workerUrl.replace(/\/$/, '') + '/webhook';
+      const telegramUrl = 'https://api.telegram.org/bot' + botToken + '/setWebhook?url=' + encodeURIComponent(webhookUrl);
+
+      showNotification(currentLang === 'ru' ? 'Откройте ссылку в новой вкладке и скопируйте результат' : 'Open link in new tab and copy result', 'success');
+
+      chrome.tabs.create({ url: telegramUrl });
+    });
+  }
+
+  const deleteWebhookBtn = document.getElementById('deleteWebhookBtn');
+  if (deleteWebhookBtn) {
+    deleteWebhookBtn.addEventListener('click', async () => {
+      const botToken = document.getElementById('botTokenInput').value.trim();
+
+      if (!botToken) {
+        showNotification(currentLang === 'ru' ? 'Введите токен бота' : 'Enter bot token', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch('https://api.telegram.org/bot' + botToken + '/deleteWebhook');
+        const result = await response.json();
+
+        if (result.ok) {
+          showNotification(currentLang === 'ru' ? 'Связь удалена!' : 'Connection deleted!', 'success');
+        } else {
+          showNotification(currentLang === 'ru' ? 'Ошибка: ' + result.description : 'Error: ' + result.description, 'error');
+        }
+      } catch (error) {
+        showNotification(currentLang === 'ru' ? 'Ошибка: ' + error.message : 'Error: ' + error.message, 'error');
+      }
+    });
+  }
+
   function loadSettings() {
     logger.info('loadSettings called');
     const settingsModal = document.getElementById('settingsModal');
     logger.info('loadSettings: settingsModal found', { exists: !!settingsModal });
     if (settingsModal) {
-      settingsModal.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (key && t(key)) el.innerHTML = t(key);
-      });
+      applyI18n(settingsModal);
     }
     chrome.storage.local.get(['telegramWorkerUrl', 'telegramBotToken', 'telegramChatId', 'telegramEnabled'], (data) => {
       document.getElementById('workerUrlInput').value = data.telegramWorkerUrl || '';
       document.getElementById('botTokenInput').value = data.telegramBotToken || '';
       document.getElementById('chatIdInput').value = data.telegramChatId || '';
       document.getElementById('telegramEnabled').checked = data.telegramEnabled || false;
+      renderSavedReminders();
     });
   }
 
   function saveSettings() {
-    const workerUrl = document.getElementById('workerUrlInput').value.trim();
+    const workerUrl = normalizeWorkerUrl(document.getElementById('workerUrlInput').value);
     const botToken = document.getElementById('botTokenInput').value.trim();
     const chatId = document.getElementById('chatIdInput').value.trim();
     const enabled = document.getElementById('telegramEnabled').checked;
@@ -2113,6 +2505,7 @@ function setupEventListeners() {
       telegramEnabled: enabled
     }, () => {
       settingsModal.classList.remove('active');
+      document.getElementById('workerUrlInput').value = workerUrl;
       showNotification(currentLang === 'ru' ? 'Настройки сохранены' : 'Settings saved');
       logger.info('Settings saved', { telegramEnabled: enabled });
     });
@@ -2266,3 +2659,470 @@ function showNotification(message, type = 'success') {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+let reminderItemId = null;
+let reminderItemType = null;
+
+function normalizeWorkerUrl(workerUrl) {
+  const trimmed = workerUrl.trim();
+  if (!trimmed) return '';
+
+  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : 'https://' + trimmed;
+  return withProtocol.replace(/\/+$/, '');
+}
+
+async function sendReminderRequest(workerUrl, path, payload) {
+  const requestUrl = normalizeWorkerUrl(workerUrl) + path;
+  logger.info('Reminder API request started', { path });
+
+  let response;
+  try {
+    response = await fetch(requestUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (error) {
+    throw new Error(t('workerFetchFailed'));
+  }
+
+  const text = await response.text();
+  let result = {};
+  try {
+    result = text ? JSON.parse(text) : {};
+  } catch (error) {
+    throw new Error(text || response.statusText);
+  }
+
+  if (!response.ok || result.error) {
+    throw new Error(result.error || response.statusText);
+  }
+
+  logger.info('Reminder API request completed', { path, result });
+  return result;
+}
+
+async function checkRemindersNow(workerUrl) {
+  const requestUrl = normalizeWorkerUrl(workerUrl) + '/check';
+  logger.info('Reminder check request started');
+
+  let response;
+  try {
+    response = await fetch(requestUrl);
+  } catch (error) {
+    throw new Error(t('workerFetchFailed'));
+  }
+  const text = await response.text();
+  let result = {};
+  try {
+    result = text ? JSON.parse(text) : {};
+  } catch (error) {
+    throw new Error(text || response.statusText);
+  }
+
+  if (!response.ok || result.error) {
+    throw new Error(result.error || response.statusText);
+  }
+
+  logger.info('Reminder check request completed', result);
+  return result;
+}
+
+function getStoredReminders(callback) {
+  chrome.storage.local.get('telegramReminders', (data) => {
+    callback(data.telegramReminders || []);
+  });
+}
+
+function saveStoredReminders(reminders, callback) {
+  chrome.storage.local.set({ telegramReminders: reminders }, () => {
+    logger.info('Stored reminders updated', { count: reminders.length });
+    if (callback) callback();
+  });
+}
+
+function addStoredReminder(reminder, callback) {
+  getStoredReminders((reminders) => {
+    reminders.unshift(reminder);
+    saveStoredReminders(reminders, callback);
+  });
+}
+
+function formatReminderDateTime(isoString) {
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return isoString;
+  return date.toLocaleString(currentLang === 'ru' ? 'ru-RU' : 'en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function getReminderRepeatLabel(repeat) {
+  if (!repeat || !repeat.type) return '';
+
+  const typeLabels = {
+    once: t('reminderRepeatOnce'),
+    daily: t('reminderDaily'),
+    weekly: t('reminderWeekly'),
+    monthly: t('reminderMonthly'),
+    weekdays: t('reminderWeekdays')
+  };
+
+  if (repeat.type === 'once') {
+    const count = Number(repeat.count || 1);
+    const intervalValue = Number(repeat.interval_value || 0);
+    const intervalUnit = repeat.interval_unit === 'hours' ? t('reminderHours') : t('reminderMinutes');
+    if (count <= 1) return typeLabels.once;
+    return `${typeLabels.once}: ${count} x ${intervalValue} ${intervalUnit}`;
+  }
+
+  if (repeat.type === 'weekdays' && Array.isArray(repeat.weekdays)) {
+    const names = {
+      0: t('weekdaySun'),
+      1: t('weekdayMon'),
+      2: t('weekdayTue'),
+      3: t('weekdayWed'),
+      4: t('weekdayThu'),
+      5: t('weekdayFri'),
+      6: t('weekdaySat')
+    };
+    return `${typeLabels.weekdays}: ${repeat.weekdays.map(day => names[day]).filter(Boolean).join(', ')}`;
+  }
+
+  return typeLabels[repeat.type] || repeat.type;
+}
+
+function updateReminderRepeatControls() {
+  const typeEl = document.getElementById('reminderRepeatType');
+  const onceOptions = document.getElementById('reminderOnceOptions');
+  const weekdayOptions = document.getElementById('reminderWeekdayOptions');
+  if (!typeEl || !onceOptions || !weekdayOptions) return;
+
+  onceOptions.classList.toggle('hidden', typeEl.value !== 'once');
+  weekdayOptions.classList.toggle('hidden', typeEl.value !== 'weekdays');
+}
+
+function buildReminderRepeatConfig() {
+  const type = document.getElementById('reminderRepeatType')?.value || 'once';
+
+  if (type === 'once') {
+    return {
+      type,
+      count: Math.max(1, Number(document.getElementById('reminderRepeatCount')?.value || 1)),
+      interval_value: Math.max(1, Number(document.getElementById('reminderRepeatIntervalValue')?.value || 1)),
+      interval_unit: document.getElementById('reminderRepeatIntervalUnit')?.value === 'hours' ? 'hours' : 'minutes'
+    };
+  }
+
+  if (type === 'weekdays') {
+    const weekdays = Array.from(document.querySelectorAll('#reminderWeekdayOptions input[type="checkbox"]:checked'))
+      .map(input => Number(input.value))
+      .filter(day => Number.isInteger(day) && day >= 0 && day <= 6);
+
+    return { type, weekdays };
+  }
+
+  return { type };
+}
+
+function findItemTitle(itemId, itemType, data) {
+  for (const [key, value] of Object.entries(data)) {
+    if (!key.match(/^\d{4}-\d{2}-\d{2}$/) || !value) continue;
+
+    if (itemType === 'note' && Array.isArray(value.notes)) {
+      const note = value.notes.find(n => n.id === itemId);
+      if (note) return note.title || itemId;
+    }
+
+    if (itemType === 'task' && Array.isArray(value.tasks)) {
+      const task = value.tasks.find(t => t.id === itemId);
+      if (task) return task.title || itemId;
+    }
+  }
+
+  return (itemType === 'note' ? t('reminderTypeNote') : t('reminderTypeTask')) + ' ' + itemId;
+}
+
+function findReminderItem(itemId, itemType, data) {
+  for (const [key, value] of Object.entries(data)) {
+    if (!key.match(/^\d{4}-\d{2}-\d{2}$/) || !value) continue;
+
+    if (itemType === 'note' && Array.isArray(value.notes)) {
+      const note = value.notes.find(n => n.id === itemId);
+      if (note) return { item: note, dateKey: key };
+    }
+
+    if (itemType === 'task' && Array.isArray(value.tasks)) {
+      const task = value.tasks.find(t => t.id === itemId);
+      if (task) return { item: task, dateKey: key };
+    }
+  }
+
+  return { item: null, dateKey: formatDate(selectedDate) };
+}
+
+function plainTextFromHtml(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html || '';
+  div.querySelectorAll('img').forEach(img => {
+    img.replaceWith(document.createTextNode('[image]'));
+  });
+  return div.innerText.trim();
+}
+
+function getDataUrlByteSize(dataUrl) {
+  const base64 = String(dataUrl || '').split(',')[1] || '';
+  return Math.ceil(base64.length * 3 / 4);
+}
+
+function extractReminderImagesFromHtml(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html || '';
+  const images = Array.from(div.querySelectorAll('img'))
+    .map((img, index) => ({
+      data_url: img.dataset.full || img.src,
+      filename: `note-image-${index + 1}.png`
+    }))
+    .filter(image => image.data_url && image.data_url.startsWith('data:image/'));
+
+  if (images.length > 10) {
+    throw new Error(t('reminderTooManyImages'));
+  }
+
+  const maxImageBytes = 8 * 1024 * 1024;
+  const maxTotalBytes = 20 * 1024 * 1024;
+  const totalBytes = images.reduce((sum, image) => {
+    const size = getDataUrlByteSize(image.data_url);
+    if (size > maxImageBytes) {
+      throw new Error(t('reminderImageTooLarge'));
+    }
+    return sum + size;
+  }, 0);
+
+  if (totalBytes > maxTotalBytes) {
+    throw new Error(t('reminderImagesTooLarge'));
+  }
+
+  return images;
+}
+
+function buildReminderImages(itemId, itemType) {
+  if (itemType !== 'note') return [];
+
+  const dateKey = formatDate(selectedDate);
+  const dateData = currentNotes[dateKey] || {};
+  const { item } = findReminderItem(itemId, itemType, { [dateKey]: dateData });
+  return item ? extractReminderImagesFromHtml(item.html) : [];
+}
+
+function buildReminderMessage(itemId, itemType, fallbackTitle) {
+  const dateKey = formatDate(selectedDate);
+  const dateData = currentNotes[dateKey] || {};
+  const { item, dateKey: itemDateKey } = findReminderItem(itemId, itemType, { [dateKey]: dateData });
+  const lines = [];
+
+  if (itemType === 'note') {
+    lines.push('🔔 ' + (currentLang === 'ru' ? 'Напоминание о заметке' : 'Note reminder'));
+    lines.push((currentLang === 'ru' ? 'Дата: ' : 'Date: ') + itemDateKey);
+    lines.push((currentLang === 'ru' ? 'Заголовок: ' : 'Title: ') + (item ? item.title : fallbackTitle));
+
+    const noteText = item ? (item.text || plainTextFromHtml(item.html)) : '';
+    if (noteText) {
+      lines.push('');
+      lines.push(currentLang === 'ru' ? 'Текст:' : 'Content:');
+      lines.push(noteText);
+    }
+  } else {
+    lines.push('🔔 ' + (currentLang === 'ru' ? 'Напоминание о задаче' : 'Task reminder'));
+    lines.push((currentLang === 'ru' ? 'Дата: ' : 'Date: ') + itemDateKey);
+    lines.push((currentLang === 'ru' ? 'Задача: ' : 'Task: ') + (item ? item.title : fallbackTitle));
+    if (item) {
+      lines.push((currentLang === 'ru' ? 'Статус: ' : 'Status: ') + (item.done ? (currentLang === 'ru' ? 'выполнена' : 'done') : (currentLang === 'ru' ? 'не выполнена' : 'not done')));
+
+      if (Array.isArray(item.subtasks) && item.subtasks.length > 0) {
+        lines.push('');
+        lines.push(currentLang === 'ru' ? 'Подзадачи:' : 'Subtasks:');
+        item.subtasks.forEach(st => {
+          const mark = st.done ? '✅' : '⬜';
+          lines.push(`${mark} ${st.text}`);
+        });
+      }
+    }
+  }
+
+  return lines.join('\n');
+}
+
+function renderSavedReminders() {
+  const listEl = document.getElementById('savedRemindersList');
+  if (!listEl) return;
+
+  getStoredReminders((reminders) => {
+    listEl.innerHTML = '';
+
+    if (reminders.length === 0) {
+      listEl.innerHTML = `<div class="no-items"><p>${t('noReminders')}</p></div>`;
+      return;
+    }
+
+    reminders.forEach((reminder) => {
+      const itemEl = document.createElement('div');
+      itemEl.className = 'saved-reminder-item';
+      const repeatLabel = getReminderRepeatLabel(reminder.repeat);
+      itemEl.innerHTML = `
+        <div>
+          <div class="saved-reminder-title">${escapeHtml(reminder.message || reminder.title || '')}</div>
+          <div class="saved-reminder-meta">${formatReminderDateTime(reminder.due_time)} · ${escapeHtml(reminder.item_type === 'note' ? t('reminderTypeNote') : reminder.item_type === 'task' ? t('reminderTypeTask') : reminder.item_type || '')}${repeatLabel ? ' · ' + escapeHtml(repeatLabel) : ''}</div>
+        </div>
+        <button class="delete-reminder-btn" data-id="${reminder.id}">${t('deleteReminder')}</button>
+      `;
+
+      itemEl.querySelector('.delete-reminder-btn').addEventListener('click', () => deleteStoredReminder(reminder.id));
+      listEl.appendChild(itemEl);
+    });
+  });
+}
+
+function deleteStoredReminder(reminderId) {
+  getStoredReminders((reminders) => {
+    const reminder = reminders.find(item => item.id === reminderId);
+    if (!reminder) return;
+
+    chrome.storage.local.get('telegramWorkerUrl', async (data) => {
+      try {
+        if (reminder.workerKey && data.telegramWorkerUrl) {
+          await sendReminderRequest(data.telegramWorkerUrl, '/delete-reminder', { key: reminder.workerKey });
+        }
+
+        const nextReminders = reminders.filter(item => item.id !== reminderId);
+        saveStoredReminders(nextReminders, () => {
+          renderSavedReminders();
+          showNotification(t('reminderDeleted'));
+        });
+      } catch (error) {
+        logger.error('Reminder delete failed', { error: error.message, reminderId });
+        showNotification(error.message, 'error');
+      }
+    });
+  });
+}
+
+function openReminderModal(itemId, itemType) {
+  reminderItemId = itemId;
+  reminderItemType = itemType;
+
+  const reminderTime = new Date();
+  reminderTime.setMinutes(reminderTime.getMinutes() + 30);
+
+  chrome.storage.local.get(null, (data) => {
+    const itemTitle = findItemTitle(itemId, itemType, data);
+
+    applyI18n(document.getElementById('reminderModal'));
+    document.getElementById('reminderTitle').value = currentLang === 'ru' ? '🔔 Напоминание: ' + itemTitle : '🔔 Reminder: ' + itemTitle;
+    document.getElementById('reminderDate').value = reminderTime.toISOString().split('T')[0];
+    document.getElementById('reminderTime').value = reminderTime.toTimeString().slice(0, 5);
+    document.getElementById('reminderRepeatType').value = 'once';
+    document.getElementById('reminderRepeatCount').value = '1';
+    document.getElementById('reminderRepeatIntervalValue').value = '5';
+    document.getElementById('reminderRepeatIntervalUnit').value = 'minutes';
+    document.querySelectorAll('#reminderWeekdayOptions input[type="checkbox"]').forEach(input => {
+      input.checked = input.value === String(reminderTime.getDay());
+    });
+    updateReminderRepeatControls();
+    document.getElementById('reminderModal').classList.add('active');
+  });
+}
+
+function closeReminderModal() {
+  document.getElementById('reminderModal').classList.remove('active');
+  reminderItemId = null;
+  reminderItemType = null;
+}
+
+function saveReminder() {
+  const title = document.getElementById('reminderTitle').value;
+  const date = document.getElementById('reminderDate').value;
+  const time = document.getElementById('reminderTime').value;
+  const repeat = buildReminderRepeatConfig();
+  let images = [];
+
+  if (!title || !date || !time || (repeat.type === 'weekdays' && repeat.weekdays.length === 0)) {
+    showNotification(t('fillAllFields'), 'error');
+    return;
+  }
+
+  const dueTime = new Date(date + 'T' + time).toISOString();
+  try {
+    images = buildReminderImages(reminderItemId, reminderItemType);
+  } catch (error) {
+    showNotification(error.message, 'error');
+    return;
+  }
+
+  chrome.storage.local.get(['telegramWorkerUrl', 'telegramChatId'], async (data) => {
+    if (!data.telegramWorkerUrl || !data.telegramChatId) {
+      showNotification(t('configureTelegram'), 'error');
+      return;
+    }
+
+    const reminder = {
+      id: generateId(),
+      chat_id: data.telegramChatId,
+      message: buildReminderMessage(reminderItemId, reminderItemType, title),
+      title: title,
+      due_time: dueTime,
+      item_id: reminderItemId,
+      item_type: reminderItemType,
+      repeat: repeat,
+      images: images
+    };
+
+    try {
+      const result = await sendReminderRequest(data.telegramWorkerUrl, '/add-reminder', reminder);
+      reminder.workerKey = result.key;
+      addStoredReminder(reminder, () => {
+        renderSavedReminders();
+        showNotification(t('reminderSaved'), 'success');
+        closeReminderModal();
+      });
+    } catch (error) {
+      logger.error('Reminder save failed', { error: error.message });
+      showNotification(error.message, 'error');
+    }
+  });
+}
+
+function handleReminderButtonClick(e) {
+  const noteBtn = e.target.closest('.reminder-note-btn');
+  const taskBtn = e.target.closest('.reminder-task-btn');
+
+  if (noteBtn) {
+    e.stopPropagation();
+    e.preventDefault();
+    openReminderModal(noteBtn.dataset.id, 'note');
+    return;
+  }
+
+  if (taskBtn) {
+    e.stopPropagation();
+    e.preventDefault();
+    openReminderModal(taskBtn.dataset.id, 'task');
+  }
+}
+
+document.addEventListener('click', handleReminderButtonClick, true);
+
+const closeReminderBtn = document.getElementById('closeReminderBtn');
+if (closeReminderBtn) closeReminderBtn.addEventListener('click', closeReminderModal);
+
+const cancelReminderBtn = document.getElementById('cancelReminderBtn');
+if (cancelReminderBtn) cancelReminderBtn.addEventListener('click', closeReminderModal);
+
+const saveReminderBtn = document.getElementById('saveReminderBtn');
+if (saveReminderBtn) saveReminderBtn.addEventListener('click', saveReminder);
+
+const reminderRepeatType = document.getElementById('reminderRepeatType');
+if (reminderRepeatType) reminderRepeatType.addEventListener('change', updateReminderRepeatControls);

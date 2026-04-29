@@ -37,6 +37,7 @@
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
           </button>
+          <button id="remindersButton" class="icon-button" title="Reminders">🔔</button>
           <input type="file" id="importInput" accept=".json" style="display: none;">
         </div>
         <button id="calendarButton" class="icon-button calendar-btn" title="Calendar View">
@@ -339,16 +340,16 @@
             
             <div class="telegram-instructions">
               <p><strong data-i18n="step1Title">Step 1: Create Telegram Bot</strong></p>
-              <p data-i18n="step1Desc">1. Open @BotFather in Telegram<br>2. Send /newbot<br>3. Enter name and username<br>4. Copy bot token</p>
+              <p data-i18n="step1Desc">1. Open @BotFather in Telegram<br>2. Send /newbot<br>3. Enter name and username<br>4. Copy bot token and paste it below in Bot Token</p>
               
               <p><strong data-i18n="step2Title">Step 2: Get Chat ID</strong></p>
-              <p data-i18n="step2Desc">1. Open your bot<br>2. Send /start<br>3. Visit: https://api.telegram.org/bot[TOKEN]/getUpdates<br>4. Find "chat":{"id":YOUR_ID}</p>
+              <p data-i18n="step2Desc">1. Open @fetch_id_bot<br>2. Click Start<br>3. Copy the number/value shown by the bot and paste it below in Chat ID</p>
               
               <p><strong data-i18n="step3Title">Step 3: Deploy Worker</strong></p>
-              <p data-i18n="step3Desc">1. Go to cloudflare.com → Workers<br>2. Create new worker, paste code from workers/reminder-worker.js<br>3. Add variable BOT_TOKEN with your token<br>4. Create KV namespace "REMINDERS" and bind it<br>5. Set webhook: https://api.telegram.org/bot[TOKEN]/setWebhook?url=https://[YOUR-WORKER].workers.dev/webhook</p>
+              <p data-i18n="step3Desc">1. Create a Cloudflare account if needed<br>2. Open Cloudflare Dashboard and click Account home<br>3. Copy Account ID from the browser URL: https://dash.cloudflare.com/ACCOUNT_ID/home/overview<br>4. Add 3 Permissions: Account -> Workers Scripts -> Edit; Account -> Workers KV Storage -> Edit; User -> Memberships -> Read<br>5. In Account Resources select Include -> Specific account -> your account (or All accounts)<br>6. Copy the token</p>
               
-              <p><strong data-i18n="step4Title">Step 4: Setup Cron</strong></p>
-              <p data-i18n="step4Desc">1. Go to cron-job.org<br>2. Create job: URL=https://[YOUR-WORKER].workers.dev/check<br>3. Schedule: Every minute</p>
+              <p><strong data-i18n="step4Title">Step 4: Run setup script</strong></p>
+              <p data-i18n="step4Desc">1. Save setup.env.example as setup.env in the setup folder<br>2. Fill CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, TELEGRAM_BOT_TOKEN, WORKER_NAME<br>3. Open the setup folder in PowerShell with cd "C:\PROJECT\PAPA CALENDARIES NOTES\setup"<br>4. Run powershell -ExecutionPolicy Bypass -File .\setup-reminders.ps1<br>5. Wait for setup to finish and copy Worker URL printed by Wrangler<br>6. Paste Worker URL and Chat ID below, click Save, then Set connection, then Test notification</p>
             </div>
             
             <div class="form-group">
@@ -374,6 +375,7 @@
               <button id="setWebhookBtn" class="primary-btn webhook-btn" data-i18n="setWebhook">Set connection</button>
               <button id="deleteWebhookBtn" class="delete-btn webhook-btn" data-i18n="deleteWebhook">Delete connection</button>
             </div>
+
           </div>
         </div>
         <div class="modal-footer">
@@ -382,6 +384,91 @@
             <button id="cancelSettingsBtn" class="secondary-btn" data-i18n="cancel">Cancel</button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="remindersModal" class="modal">
+    <div class="modal-content reminders-modal">
+      <div class="modal-header">
+        <h3 data-i18n="remindersList">Reminders</h3>
+        <button id="closeRemindersBtn" class="icon-button small">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="savedRemindersList" class="saved-reminders-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="reminderModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 data-i18n="reminderTitle">Set Reminder</h2>
+        <button id="closeReminderBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label data-i18n="reminderMessageLabel">Message</label>
+          <input type="text" id="reminderTitle" class="input-field">
+        </div>
+        <div class="form-group">
+          <label data-i18n="reminderDate">Date</label>
+          <input type="date" id="reminderDate" class="input-field">
+        </div>
+        <div class="form-group">
+          <label data-i18n="reminderTime">Time</label>
+          <input type="time" id="reminderTime" class="input-field">
+        </div>
+        <div class="form-group">
+          <label data-i18n="reminderRepeatTypeLabel">Repeat</label>
+          <select id="reminderRepeatType" class="input-field">
+            <option value="once" data-i18n="reminderRepeatOnce">Once</option>
+            <option value="daily" data-i18n="reminderDaily">Daily</option>
+            <option value="weekly" data-i18n="reminderWeekly">Weekly</option>
+            <option value="monthly" data-i18n="reminderMonthly">Monthly</option>
+            <option value="weekdays" data-i18n="reminderWeekdays">Selected weekdays</option>
+          </select>
+        </div>
+        <div id="reminderOnceOptions" class="reminder-repeat-options">
+          <div class="form-group">
+            <label data-i18n="reminderRepeatCountLabel">Times</label>
+            <input type="number" id="reminderRepeatCount" class="input-field" min="1" max="100" value="1">
+          </div>
+          <div class="reminder-interval-row">
+            <div class="form-group">
+              <label data-i18n="reminderRepeatIntervalLabel">Interval</label>
+              <input type="number" id="reminderRepeatIntervalValue" class="input-field" min="1" max="10080" value="5">
+            </div>
+            <div class="form-group">
+              <label data-i18n="reminderRepeatIntervalUnitLabel">Unit</label>
+              <select id="reminderRepeatIntervalUnit" class="input-field">
+                <option value="minutes" data-i18n="reminderMinutes">minutes</option>
+                <option value="hours" data-i18n="reminderHours">hours</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div id="reminderWeekdayOptions" class="form-group reminder-weekday-options hidden">
+          <label data-i18n="reminderWeekdayLabel">Weekdays</label>
+          <div class="weekday-checkboxes">
+            <label><input type="checkbox" value="1"> <span data-i18n="weekdayMon">Mon</span></label>
+            <label><input type="checkbox" value="2"> <span data-i18n="weekdayTue">Tue</span></label>
+            <label><input type="checkbox" value="3"> <span data-i18n="weekdayWed">Wed</span></label>
+            <label><input type="checkbox" value="4"> <span data-i18n="weekdayThu">Thu</span></label>
+            <label><input type="checkbox" value="5"> <span data-i18n="weekdayFri">Fri</span></label>
+            <label><input type="checkbox" value="6"> <span data-i18n="weekdaySat">Sat</span></label>
+            <label><input type="checkbox" value="0"> <span data-i18n="weekdaySun">Sun</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="saveReminderBtn" class="primary-btn" data-i18n="save">Save</button>
+        <button id="cancelReminderBtn" class="secondary-btn" data-i18n="cancel">Cancel</button>
       </div>
     </div>
   </div>
