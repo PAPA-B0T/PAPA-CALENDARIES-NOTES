@@ -92,6 +92,7 @@
 
 ### 🎥 Full Video Instruction
 ![Video Instruction](INSTRYCTION-GIF.gif)
+![Video Instruction 2](INSTRYCTION-GIF2.gif)
 
 Full video instruction on extension installation and functionality.
 
