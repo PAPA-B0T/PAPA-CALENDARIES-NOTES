@@ -967,14 +967,33 @@ button {
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: var(--background);
+  color: var(--text);
   font-size: 14px;
 }
 
 #reminderModal .input-field:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--highlight);
+}
+
+#reminderModal select.input-field {
+  color-scheme: light;
+  appearance: auto;
+}
+
+#reminderModal select.input-field option {
+  background-color: #ffffff;
+  color: #1e293b;
+}
+
+[data-theme="dark"] #reminderModal select.input-field {
+  color-scheme: dark;
+}
+
+[data-theme="dark"] #reminderModal select.input-field option {
+  background-color: #1e293b;
+  color: #f8fafc;
 }
 
 .note-title-input {
